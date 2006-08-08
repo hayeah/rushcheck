@@ -1,0 +1,141 @@
+--- /Users/ikegami/install/setup-3.4.1/setup.rb	2005-11-20 20:54:27.000000000 +0900
++++ setup.rb	2006-08-05 21:18:51.000000000 +0900
+@@ -55,10 +55,12 @@
+     @config_opt = nil
+     @verbose = true
+     @no_harm = false
++    @rdoc_prefix = nil
+   end
+ 
+   attr_accessor :install_prefix
+   attr_accessor :config_opt
++  attr_accessor :rdoc_prefix
+ 
+   attr_writer :verbose
+ 
+@@ -761,7 +763,8 @@
+     [ 'install',  'installs files' ],
+     [ 'test',     'run all tests in test/' ],
+     [ 'clean',    "does `make clean' for each extention" ],
+-    [ 'distclean',"does `make distclean' for each extention" ]
++    [ 'distclean',"does `make distclean' for each extention" ],
++    [ 'rdoc',     "make documents using rdoc"]
+   ]
+ 
+   def ToplevelInstaller.invoke
+@@ -814,7 +817,7 @@
+       exec_install
+     else
+       case task
+-      when 'config', 'test'
++      when 'config', 'test', 'rdoc'
+         ;
+       when 'clean', 'distclean'
+         @config.load_savefile if File.exist?(@config.savefile)
+@@ -901,6 +904,7 @@
+   alias parsearg_test       parsearg_no_options
+   alias parsearg_clean      parsearg_no_options
+   alias parsearg_distclean  parsearg_no_options
++  # alias parsearg_rdoc       parsearg_no_options
+ 
+   def parsearg_config
+     evalopt = []
+@@ -945,6 +949,20 @@
+     end
+   end
+ 
++  def parsearg_rdoc
++    @config.rdoc_prefix = ''
++    while a = ARGV.shift
++      case a 
++      when /\A--rdoc=/
++        path = a.split(/=/, 2)[1]
++        path = File.expand_path(path) unless path[0,1] == '/'
++        @config.rdoc_prefix = path
++      else
++        setup_rb_error "rdoc: unknown option #{a}"
++      end
++    end
++  end
++
+   def print_usage(out)
+     out.puts 'Typical Installation Procedure:'
+     out.puts "  $ ruby #{File.basename $0} config"
+@@ -981,6 +999,9 @@
+     out.printf fmt, '--no-harm', 'only display what to do if given', 'off'
+     out.printf fmt, '--prefix=path',  'install path prefix', ''
+     out.puts
++    out.puts 'Options for RDOC:'
++    out.printf fmt, '--rdoc=path', 'rdoc path prefix', ''
++    out.puts
+   end
+ 
+   #
+@@ -1001,7 +1022,12 @@
+   end
+ 
+   def exec_test
+-    @installer.exec_test
++    result = @installer.exec_test
++    exit(result ? 0 : 1)
++  end
++
++  def exec_rdoc
++    @installer.exec_rdoc
+   end
+ 
+   def exec_show
+@@ -1105,8 +1131,16 @@
+ 
+   def exec_test
+     run_hook 'pre-test'
+-    each_selected_installers {|inst| inst.exec_test }
++    results = each_selected_installers {|inst| inst.exec_test }
+     run_hook 'post-test'
++
++    results.all? {|r| r}
++  end
++
++  def exec_rdoc
++    run_hook 'pre-rdoc'
++    each_selected_installers {|inst| inst.exec_rdoc }
++    run_hook 'post-rdoc'
+   end
+ 
+   def exec_clean
+@@ -1133,8 +1167,10 @@
+       $stderr.puts "Processing the package `#{pack}' ..." if verbose?
+       Dir.mkdir "packages/#{pack}" unless File.dir?("packages/#{pack}")
+       Dir.chdir "packages/#{pack}"
+-      yield @installers[pack]
++      result = yield @installers[pack]
+       Dir.chdir '../..'
++      
++      result
+     end
+   end
+ 
+@@ -1468,6 +1504,15 @@
+   end
+ 
+   #
++  # TASK rdoc
++  #
++  def exec_rdoc
++    path = @config.rdoc_prefix ? @config.rdoc_prefix : srcdir_root + "/rdoc"
++    comm = ["rdoc", "-o", path].join(" ")
++    Dir.chdir("./lib") { system comm }
++  end
++
++  #
+   # TASK clean
+   #
+ 
+@@ -1493,6 +1538,7 @@
+   #
+ 
+   def exec_distclean
++    rm_rf "rdoc"
+     exec_task_traverse 'distclean'
+     rm_f @config.savefile
+     rm_f 'InstalledFiles'

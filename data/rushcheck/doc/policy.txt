@@ -1,0 +1,152 @@
+2006-07-26 start	Daisuke IKEGAMI <ikegami@madscientist.jp>
+
+porting policy
+--------------
+
+1. Haskell98 System.Random
+
+1.1 type, type classes and functions in System.Random
+
+class RandomGen g where
+  next     :: g -> (Int, g)
+  split    :: g -> (g, g)
+  genRange :: g -> (Int, Int)
+
+data StdGen = StdGen Int Int
+instance RandomGen StdGen
+instance Show      StdGen
+instance Read      StdGen
+
+mkStdGen :: Int -> StdGen
+
+class Random a where
+  random    :: RandomGen g => g -> (a, g)
+  randomR   :: RandomGen g => (a, a) -> g -> (a, g)
+  randoms   :: RandomGen g => g -> [a]
+  randomRs  :: RandomGen g => (a, a) -> g -> [a]
+  randomIO  :: IO a
+  randomRIO :: (a, a) -> IO a
+instance Random Int
+instance Random Char
+instance Random Bool
+instance Random Integer
+instance Random Double
+instance Random Float
+
+getStdRandom :: (StdGen -> (a, StdGen)) -> IO a
+getStdGen    :: IO StdGen
+setStdGen    :: StdGen -> IO ()
+newStdGen    :: IO StdGen
+
+1.2 porting policy for System.Random in Haskell to Ruby
+
+Haskell              ruby
+System.Random   ---> rushcheck/random.rb
+
+Haskell              ruby
+class RandomGen ---> module RandomGen
+                       for instance methods
+
+'method RandomGen' is assumed to be included for making instance
+methods.
+
+  Haskell
+  next     :: g -> (Int, g)
+  split    :: g -> (g, g)
+  genRange :: g -> (Int, Int)
+  --->
+  Ruby
+  RandomGen#gen_next  :: [Fixnum, SELF]
+  RandomGen#split     :: [SELF, SELF]
+  RandomGen#gen_range :: [Fixnum, Int]
+  
+- because 'next' is a reserved word of ruby, change it to 'gen_next'.
+- SELF is the class which includes the module RandomGen.
+- Haskell's Int is similar to Ruby's Fixnum
+
+  Haskell
+  data StdGen = StdGen Int Int
+  instance RandomGen StdGen
+  instance Show      StdGen
+  instance Read      StdGen
+  mkStdGen :: Int -> StdGen
+  --->
+  Ruby
+  class StdGen
+  StdGen#initialize(left::Fixnum=nil, right::Fixnum = nil)
+  StdGen includes module RandomGen
+  StdGen#to_s
+
+- read is not implemented yet (maybe unnecessary?)
+- StdGen requires two integers in default, but we can also create
+  StdGen with only one integer by mkStdGen. Therefore,
+  StdGen#initialize takes one/two integers. In addition, we can make
+  StdGen without any integers but they are generated randomly.
+
+  Haskell
+  class Random a where
+  random    :: RandomGen g => g -> (a, g)
+  randomR   :: RandomGen g => (a, a) -> g -> (a, g)
+  randoms   :: RandomGen g => g -> [a]
+  randomRs  :: RandomGen g => (a, a) -> g -> [a]
+  randomIO  :: IO a
+  randomRIO :: (a, a) -> IO a
+  --->
+  Ruby
+  module HsRandom
+  HsRandom#random
+    (gen::RandomGen, lo::HsRandom=nil, hi::HsRandom=nil)
+    :: [HsRandom, RandomGen] 
+  HsRandom#random_array
+    (gen::RandomGen, len::Integer=nil, 
+     lo::HsRandom=nil, hi::HsRandom=nil)
+    :: [HsRandom, RandomGen] 
+  HsRandom#random_std(lo::HsRandom=nil, hi::HsRandom=nil)
+  private
+  HsRandom#random_range
+    (gen::RandomGen, lo::HsRandom=nil, hi::HsRandom=nil)
+    :: [HsRandom, RandomGen] 
+
+  Haskell
+  instance Random Int
+  instance Random Integer
+  --->
+  Ruby
+  class Integer includes the module HsRandom
+    why not Fixnum and Bignum?
+
+  Haskell
+  instance Random Char
+  -->
+  Ruby
+  class String includes the module HsRandom
+
+  Haskell
+  instance Random Double
+  instance Random Float
+  -->
+  Ruby
+  class Float includes the module HsRandom
+
+  Haskell
+  instance Random Bool
+  -->
+  Ruby
+  nop
+    why not TrueClass and FalseClass?
+      but what is the randomness of TrueClass?
+
+  Haskell
+  getStdRandom :: (StdGen -> (a, StdGen)) -> IO a
+  -->
+  Ruby
+  nop
+
+  Haskell
+  newStdGen    :: IO StdGen
+  setStdGen    :: StdGen -> IO ()
+  getStdGen    :: IO StdGen
+  -->
+  Ruby
+  class TheStdGen (singleton class)
+
