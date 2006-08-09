@@ -47,7 +47,7 @@ class RushCheckConfig
           when 1
             '(' + bag[0] + ").\n"
           else
-            ".\n" + bag.join(".\n")
+            ".\n" + bag.join(".\n") + ".\n"
           end
 
     print mes
@@ -82,7 +82,7 @@ class RushCheckConfig
         ntest += 1
         redo
       when false
-        error = "\nFalsifiable, after " + ntest.to_s + " tests:\n" + 
+        error = "Falsifiable, after " + ntest.to_s + " tests:\n" + 
           result.arguments.join("\n")
         puts error
         tests_result = false
