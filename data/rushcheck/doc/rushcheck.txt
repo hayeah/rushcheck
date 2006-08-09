@@ -1,5 +1,5 @@
 RushCheck - a random testing tool for Ruby
-Tutorial for version 0.2
+Tutorial for version 0.3
 2006-08-08 Daisuke IKEGAMI <ikegami@madscientist.jp>
 
 This document is a draft and may be obsoleted in future. 
