@@ -20,8 +20,8 @@ module Testable
     yield ? label(name) : property
   end
 
-  def imply(p)
-    p ? property : Result.nothing.result
+  def imply
+    yield ? property : Result.nothing.result
   end
 
   def label(s)
