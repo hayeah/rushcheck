@@ -16,8 +16,8 @@ module Testable
   alias quick_check :check
   alias quickcheck  :check
 
-  def classify(p, name)
-    p ? label(name) : property
+  def classify(name)
+    yield ? label(name) : property
   end
 
   def imply(p)
@@ -34,8 +34,8 @@ module Testable
   end
   alias verbose_check :test
 
-  def trivial(p)
-    classify(p, 'trivial')
+  def trivial
+    classify('trivial') { yield }
   end
 
 end
