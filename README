@@ -47,6 +47,3 @@ does not change unless a test is failed.
 
 2. add the rdoc command to setup.rb and distclean the rdoc dir
 
-In this directory, there is 'setup.rb.patch' for the change
-to apply setup.rb ver 3.4.1.
-
