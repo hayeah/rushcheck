@@ -3,14 +3,51 @@
 # Almost all implementations are similar to Haskell's one.
 # Therefore check also the Haskell implementation.
 
+require 'rushcheck/gen'
+
 # Gen provides functions for generating test instances.
 class Gen
+
+  @@max_create = 10000
 
   # choose is one of primitive generators to create a random Gen object. 
   # choose returns a Gen object which generates a random value in the
   # bound. It may useful to implement arbitrary method into your class.
   def self.choose(lo=nil, hi=nil)
     rand.fmap {|x| lo.class.random(x, lo, hi)[0] }
+  end
+
+  # create is one of primitive generators to create a random Gen object.
+  # create takes an array of Gen objects, and any block to generate object.
+  # Then create returns a Gen object. It may useful to implement
+  # arbitrary method into your class.
+  def self.create(xs, &f)
+    Gen.new do |n, r|
+      r2 = r
+      nguard = f.arity - xs.length
+      guards = nguard >= 0 ? Array.new(nguard, Guard.new) : []
+
+      try = 0
+      begin
+        if try > @@max_create 
+          raise(RuntimeError, "Failed to guards too many.") 
+        end
+        args = xs.map do |gen|
+          r1, r2 = r2.split
+          gen.value(n, r1)
+        end
+        ys = args + guards
+        f.call(*ys)
+      rescue Exception => ex
+        case ex
+        when RushCheckGuard
+          try += 1
+          retry
+        else
+          raise(ex, ex.to_s)
+        end
+      end
+    end
   end
 
   # elements is one of primitive generators to create a random Gen

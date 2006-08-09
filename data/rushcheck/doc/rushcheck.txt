@@ -433,6 +433,7 @@ Check also the web page
   class Candy
 
     def initialize(name, price)
+      raise unless price >= 0
       @name, @price = name, price
     end
 
@@ -448,16 +449,42 @@ Check also the web page
 
   To write random generator, we have to look up 'initialize'.
   Here, assume that @name belongs String and @price belongs Integer.
+  It is natural that we assumes @price should be positive.
   
   One simple random generator for Candy:
 
-  (1) using Gen#bind and Gen.unit
+  (1) using Gen.create
   class Candy
     extend Arbitrary
 
     def self.arbitrary
-      Integer.arbitrary.bind do |name|
-        String.arbitrary.bind do |price|
+      xs = [String, Integer].map {|c| c.arbitrary}
+      Gen.create(xs) do |name, price, g|
+        g.guard { price >= 0 }
+        new(name, price)
+      end
+    end
+  end
+
+  Gen.create takes an array of Gen object (here, [Integer.arbitrary,
+  String.arbitrary]) and a block. The block takes variables which is
+  corresponded to the array, as Assertion.new. If guard is failed,
+  then RushCheck retry to create another random instance. 
+
+  Note that we can use a trick instead of the guard property.
+    price = - price if price < 0   # g.guard { price >= 0 }
+  In this case, this is more efficient to generate random instance
+  than with the guard. However, sometimes we don't have this kind
+  trick and we can use some guards.
+
+  (2) using Gen#bind and Gen.unit
+  class Candy
+    extend Arbitrary
+
+    def self.arbitrary
+      String.arbitrary.bind do |name|
+        Integer.arbitrary.bind do |price|
+          price = - price if price < 0   # trick
           Gen.unit(new(name, price))
         end
       end
@@ -466,8 +493,8 @@ Check also the web page
 
   Puzzled? OK, they can be readed as follows:
 
-    take a random (arbitrary) integer and call it 'name'
-      take a random string and call it 'price'
+    take a random (arbitrary) string and call it 'name'
+      take a random integer and call it 'price'
         return a Gen object which has a new Candy(name, price)
 
   In general, the class method arbitrary should return a Gen object.
@@ -477,17 +504,18 @@ Check also the web page
   There are several way to implement random generators. The next
   example is to use Gen.new without bind and unit.
 
-  (2) using Gen.new
+  (3) using Gen.new
   class Candy
     extend Arbitrary
 
     def self.arbitrary
       Gen.new do |n, r|
         r2 = r
-        name, price = [Integer, String].map do |c|
+        name, price = [String, Integer].map do |c|
           r1, r2 = r2.split
           c.arbitrary.value(n. r1)
         end
+	price = - price if price < 0 # trick
         new(name, price)
       end
     end
@@ -506,6 +534,7 @@ Check also the web page
         get new two random generator r1 and r2 from old r2
         assign a random value by generating 'arbitrary.value(n, r1)'
           and discard the random generator r1 
+            ...
 
   Note that we need new random generator for each random object.
   Here we create new random generator by spliting. If you use same
@@ -513,13 +542,32 @@ Check also the web page
   distribution of objects are same (not generated randomly).
 
   Because sometimes the initialize of YourClass is complecated,
-  then the random generator self.arbitrary turns to be complecated
+  then the random generator self.arbitrary turns to be complicated
   also.
 
   In next sections, I will introduce several generators in gen.rb.
   They may be useful to create your own random genrator. See also rdoc
   of Gen.
 
+  Appendix: expensive candy.
+
+  Using Gen.create to generate random instance, if we gives another
+  guard such as   
+    g.guard { price >= 100000 }  # very expensive candy!
+  then it consumes much time to generate random instance because the
+  guard fails so many times. When RushCheck creates random instances,
+  it starts smallest as   possible, then the size becomes larger in
+  repeating tests. Therefore, if the guard instance seems failed so
+  often, then we need another seeds of generators. Here is another
+  generators for expensive candy instance.
+
+    lo = 100000
+    g = Gen.sized { |n| Gen.choose(lo, n + lo)}
+    xs = [String.arbitrary, g]
+
+  See gen.rb and the following sections in details for how to get
+  another generator. 
+  
   6.2 Gen.choose
 
   Gen.choose(lo, hi) returns a Gen object which generates a random
@@ -596,7 +644,17 @@ Check also the web page
 
   Gen.vector(Integer, 3) # => Gen [Integer, Integer, Integer]
 
-7. Further information
+7. how to write random Proc which returns objects in YourClass
+
+  It is complecated, and see some examples.
+   - rushcheck/bool.rb
+   - rushcheck/integer.rb
+   - rushcheck/string.rb
+   so on, grep 'coarbitrary'
+
+  FIXME: how to write coarbitrary
+
+8. Further information
 
   Webpage should have another useful information:
     http://rushcheck.rubyforge.org/
