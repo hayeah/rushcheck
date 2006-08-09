@@ -30,12 +30,17 @@ class Assertion
   def property
     Property.new(Gen.new do |n, r|
       r2 = r
-      @inputs.map do |c|
-        r1, r2 = r2.split
-        c.arbitrary.value(n, r1)
+      if @inputs
+      then
+        @inputs.map do |c|
+          r1, r2 = r2.split
+          c.arbitrary.value(n, r1)
+        end
+      else
+        []
       end
     end.bind do |args|
-      guards = Array.new(@nguard, Guard.new)
+      guards = @nguard >= 0 ? Array.new(@nguard, Guard.new) : []
       test = begin
                xs = args + guards
                @proc.call(*xs)
