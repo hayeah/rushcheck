@@ -26,9 +26,9 @@ class RandomArray < Array
           Gen.new do |n, r|
             ary = [@@base.arbitrary.value(n, r)]
             r2 = r
-            (1..len).each do 
+            (1..len).each do |i|
               r1, r2 = r2.split
-              ary << @@indp.call(ary).arbitrary.value(n, r1)
+              ary << @@indp.call(ary, i).arbitrary.value(n, r1)
             end
 
             ary
