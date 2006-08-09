@@ -50,11 +50,11 @@ class Gen
   # variable. The block should return a Gen object. lift_array returns
   # a Gen object which generates an array of the result of given block
   # for applying each member of given array. 
-  def self.lift_array(ary)
+  def self.lift_array(xs)
     Gen.new do |n, r|
       r2 = r
-      ary.map do |c|
-        r1, r2 = r.split
+      xs.map do |c|
+        r1, r2 = r2.split
         yield.value(n, r1)
       end
     end
