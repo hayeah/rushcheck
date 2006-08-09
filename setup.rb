@@ -1508,6 +1508,9 @@ class Installer
   #
   def exec_rdoc
     path = @config.rdoc_prefix ? @config.rdoc_prefix : srcdir_root + "/rdoc"
+    if path.nil? || path.empty?
+      raise(RuntimeError, "Set --rdoc option to indicate directory.")
+    end
     comm = ["rdoc", "-o", path].join(" ")
     Dir.chdir("./lib") { system comm }
   end
