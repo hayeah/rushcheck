@@ -1,0 +1,612 @@
+RushCheck - a random testing tool for Ruby
+Tutorial for version 0.2
+2006-08-08 Daisuke IKEGAMI <ikegami@madscientist.jp>
+
+This document is a draft and may be obsoleted in future. 
+Check also the web page
+  http://rushcheck.rubyforge.org
+
+= Getting started
+
+== Install
+
+  % ruby setup.rb
+
+  at the root directory of the source code. The installation should be
+  easy. If not, unfortunately, please let me know. The author want to
+  distribute the library as a rubygem in future.
+
+== Tutorial for writing testcase
+
+1. add the following declaration to load RushCheck library
+
+     require 'rushcheck/rushcheck'
+
+2. and require also your library file if the class you want to test is
+   included in it. 
+
+     require 'your_library'
+
+3. How to write assertions:
+
+   OK, then we can start to write test codes. RushCheck requires to
+   write /assertion based/ testcases. An assertion of function (or
+   method) consists of triple where inputs, guard conditions and a
+   testing property block. Here is a templete of assertion: 
+
+     Assertion.new(Class1, Class2, ...) do |x, y, z, ..., g1, g2, ...|
+       # testing property block
+       # this block should return boolean value (true, false or nil)
+       # in Ruby
+     end
+
+   For example, assume that we want to test the method 'sort' in
+   Array. The following assertion is a simple testcase:
+
+     ast_zero = 
+       Assertion.new() do 
+         [].sort == []
+       end
+
+   whether if we sort empty array the result is also empty.
+   This assertion does not have any inputs and guards but only have
+   the property block. 
+
+   Let's see another example:
+
+     ast_one = 
+       Assertion.new(Integer) do |x|
+         [x].sort == [x]
+       end
+
+   This assertion defines that we claim for any integer 'x', an array
+   [x] is not changed after sorting. We can test the property 100 times:
+
+     irb> ast_one.verbose_check
+     1:
+     [-1]
+     2:
+     [-2]
+     ... (snip) ...
+     99:
+     [6]
+     100:
+     [1]
+     OK, passed 100 tests.
+     true
+     irb> ast_one.check
+     OK, passed 100 tests.
+     true
+     irb>
+
+   RushCheck supports random testing such as above. We will see later
+   how to change the number of test, how to change the distribution,
+   etc. Here we learned two testing methods, verbose_check and check.
+   'verbose_check' displays every instances of test, on the other hand
+   'check' does not display inputs but only the result.
+
+   Next example shows how RushCheck displays the counter example. If
+   an assertion is failed, then there is a counter example of the
+   assertion. 
+
+     ast_two = 
+       Assertion.new(Integer, Integer) do |x, y|
+         [x, y].sort == [x, y]
+       end
+
+   The above test is failed sometimes and we can find the result after
+   checking.
+
+     irb> ast_two.check
+     Falsifiable, after 3 tests:
+     [2, -1]
+     false
+     irb>
+
+   Here, the counter example [2, -1] of the assertion is appeared. In
+   fact, [2, -1].sort equals [-1, 2] and does not equal [2, -1]. 
+
+   Sometimes, we need several pre-conditions for tests. For example,
+   if we have a pre-condition 'x <= y' in the previous assertion, then
+   the assertion should be succeeded. We can write pre-conditions as
+   guards in the property block:
+
+     ast_two_sorted =
+       Assertion.new(Integer, Integer) do |x, y, g|
+         g.guard { x <= y }
+         [x, y].sort == [x, y]
+       end
+
+     irb> ast_two_sorted.check
+     OK, passed 100 tests.
+     true
+     irb>
+
+   In this example, the number of arguments of Assertion.new (equals
+   2) is less than the number of variables of the property block
+   (equals 3). It is always assumed that the number of arguments of
+   Assertion.new is equal or less than the number of variables of the
+   block. The arguments of Assertion.new corresponds to the variables
+   of block one to one. Then the rest of variables is assumed as guard
+   conditions (in this example, the variable g is not corresponded and
+   assumed as a guard). We can have any number of guards in the
+   property block. If the guard property does not hold in random
+   testing, then the test is abort and try to take another random
+   instances. We can imagine the following test sequences in
+   ast_two_sorted. 
+
+     1: x, y = 1, 2
+          --> guard g is passed
+          --> check the test block and succeed
+     2: x, y = 3, 1
+          --> guard g is failed and abort
+              (not counted)
+     3: x, y = 2, 3
+          --> ...
+     ... (whether passed 100 tests or not)
+
+4. Watching the statistics:
+
+   In the previous section, we saw two methods 'check' and
+   'verbose_check'. Sometimes, we want to watch the statistics of
+   random testing. However 'check' shows less information, and
+   'verbose_check' is too noisy. RushCheck has several options to
+   watch the statistics.
+
+   4.1 'trivial'
+
+   You may not want to check the trivial case in random test. As we
+   have seen, we can ignore the trivial case using the guard
+   condition. However, on the other hand, we can watch how many
+   trivial cases are appeared in random test.
+
+     ast_sort_triv =
+       Assertion.new(Integer, Integer) do |x, y, g|
+         g.guard {x <= y}
+         ([x, y].sort == [x, y]).trivial{ x == y }
+       end
+
+     irb> ast_sort_triv.check
+     OK, passed 100 tests(14%, trivial).
+     true
+
+   Here, we have 14% (i.e. 14 times) trivial (x == y) cases in the
+   test.
+
+   4.2 'classify'
+
+   In addition, we can give another names to watching statistics.
+     ast_sort_classify =
+       Assertion.new(Integer, Integer) do |x, y, g|
+         g.guard {x <= y}
+         test = ([x, y].sort == [x, y])
+         test.classify('same'){ x == y }.
+           classify('bit diff'){ (x - y).abs == 1 } 
+       end
+
+     irb> ast_sort_classify.check
+     OK, passed 100 tests.
+     18%, same.
+     11%, bit diff.
+     true
+     irb>
+
+5. With another basic classes for assertions
+
+  In previous sections, we have seen how to check assertions for any
+  integers. In similar way, we can define the assertions for any float
+  numbers or any string. 
+
+     Assertion.new(Float, String, ...) do |x, y,..., g, ...|
+       # ...
+     end
+
+  RushCheck has default random generators for the following basic classes:
+    - Integer
+    - Float
+    - String
+  If you want to change the distribution of randomness, then you have
+  to write a code for generator. There are some examples for writing
+  generators. In the next section, I will introduce SpecialString
+  whose distribution differs to the default implementation of String.
+
+  Even Array, Hash and Proc are also primitive classes, however the
+  randomness of them should be changed in testing codes. Therefore,
+  RushCheck provides an abstract generators for them. Programmer need
+  to write a subclass of the abstract generators. In section 5.2 and
+  later I will show you how to write a subclass of RandomArray, etc.
+
+  5.1 SpecialString
+
+  Sometimes, we want to check special characters, for example the
+  backslash '\' or unprinted characters 'ESC', 'NUL' and so on.
+  SpecialString is a subclass of String which is defined in
+  'rushcheck/string'. This library is already required in
+  'rushcheck/rushcheck' and don't need to require again.
+
+  The output of random generator of SpecialString has different
+  distribution of its of String. At String, the distribution of
+  characters are normalized. On the other hand, the distribution in
+  SpecialString is weighted and the generator provides special
+  characters more often than alphabets. In detail, the distribution is
+  as follows:
+ 
+    the distribution of SpecialString
+    ---------------------------------------
+      Alphabet              ... 15 %
+      Control characters    ... 50 % (such as NUL)
+      Number                ... 10 %
+      Special characters    ... 25 % (such as '\')
+
+  Using SpecialString in assertions, it is more likely to find the
+  counter example. The following example is the famous bug which is
+  called 'malformed format bug'.
+
+    malformed_format_string =
+      Assertion.new(String) { |s| sprintf(s); true}
+
+    malformed_format_string2 =
+      Assertion.new(SpecialString) { |s| sprintf(s); true}
+ 
+  irb> malformed_format_string.check
+  Falsifiable, after 86 tests:
+  Unexpected exception: #<ArgumentError: malformed format string - %&>
+      ... snip error traces ...
+  ["\n&'e!]hr(%&\031Vi\003 }ss"]
+  false
+  irb> malformed_format_string2.check
+  Falsifiable, after 15 tests:
+  Unexpected exception: #<ArgumentError: malformed format string>
+  ["%\037-R"]
+  false
+
+  In these results, we can see RushCheck find the counter example
+  after 86 tests with String, on the other hand, find it quickly after 15
+  tests with SpecialString.
+
+  It is easy to change the distribution in SpecialString. You can
+  define your subclass of SpecialString as follows:
+
+  class YourSpecialString < SpecialString
+    @@frequency = { 'alphabet' => 1,
+                    'control'  => 0,
+                    'number'   => 0,
+                    'special'  => 9 }  
+  end
+
+  5.2 Array and RandomArray
+
+  The meaning of randomness for Array must be changed in testing
+  codes. Sometimes you needs a random array of Integer, and another a
+  random array of String. So what is random array?
+
+  RushCheck provides an abstract class RandomArray for abstract random
+  generator. Programmer have to write a subclass of RandomArray as
+  follows:
+
+  # for random array of integers
+  class MyRandomArray < RandomArray; end
+  MyRandomArray.set_pattern(Integer) {|ary, i| Integer}
+
+  (I don't like the name set_pattern and may change it in future)
+
+  The class method set_pattern takes a variable and a block.
+  Because array is /inductive/ structure, it can be defined by the
+  basecase and the inductive step.
+
+  For example, let's consider a random array
+    [Integer, String, Integer, String, ...]
+  where it has Integer at the odd index and String at the even index.
+  Then we can write a random array with this pattern:
+
+    MyRandomArray.set_pattern(Integer) do |ary, i|
+      if i % 2 == 0
+      then String
+      else Integer
+    end
+
+  More complecated example? OK, let's consider a stream:
+    the first component is Integer
+    if the i-th component is positive integer 
+       then (i+1)-th component is String
+    otherwise the (i+1)-th component is Integer
+
+    MyRandomArray.set_pattern(Integer) do |ary, i|
+      if ary[i].kind_of?(Integer) && ary[i] >= 0
+      then String
+      else Integer
+      end
+    end 
+
+  In this way, we can define any random array with any pattern.
+
+  5.3 Hash and RandomHash
+
+  Hash is also primitive and not so clear what is a random hash, like
+  array. RushCheck provides an abstract random generator RandomHash,
+  and programmer can write a subclass of RandomHash.
+
+  class MyRandomHash < RandomHash; end
+  pat = { 'key1' => Integer, 'key2' => String }
+  MyRandomHash.set_pattern(pat)
+
+  In this example, we can get a random Hash with two keys ('key1' and
+  'key2'). Here the keys are String, but we can give any object as
+  usual in Hash. Is it clear to define random hash? I think so.
+  (If not it is clear, then the interface may be changed in future)
+
+  5.4 Proc and RandomProc
+
+  It is not difficult to create a random Proc object.
+  As we saw in the previous sections, we have to write a subclass of
+  RandomProc.
+
+  class MyRandomProc < RandomProc; end
+  MyRandomProc.set_pattern([Integer], [Integer])
+
+  Here, we define a random procedure which takes an integer and
+  returns an integer also. In general, Ruby's function and method can
+  be regarded as a relation. (not a function in mathematics!)
+  Therefore I think random procedures can be generated by a pair of
+  inputs and outputs.
+
+  Let's consider a simple example. In general, any functions f, g, and
+  h should satisfy the associativity property:
+    for all x, f(g(h(x)) === (f . g)(h (x))
+       where f . g is a composition of functions in mathematical way
+
+  class Proc
+    # application
+    def **(other)
+      Proc.new do |*args|
+        res = other.call(*args)
+        call(*res)
+      end
+    end
+  end
+
+  class MyRandomProc < RandomProc; end
+
+  def associativity_integer
+    MyRandomProc.set_pattern([Integer], [Integer])
+    Assertion.new(MyRandomProc, MyRandomProc, MyRandomProc, Integer) do
+      |a, b, c, x|
+      (a ** (b ** c)).call(x) == ((a ** b) ** c).call(x)
+    end.check
+  end
+
+  P.S.  
+    The arbitrary method is used to create a random object for test
+    instance. Then you may wonder what is the coarbitrary method?
+    The coarbitrary method is used to generate a random procedure
+    (lambda), which is one of central idea in QuickCheck.
+
+6. How to define random generators for user defined class
+
+  6.1 Understand your class. What is a random object?
+
+  To use your class in the assertion, like follows
+    Assertion.new(YourClass) {...}
+  you have to write a code which generates a random object in your
+  class. Therefore, at first we have to consider
+    what is a random object in YourClass?
+
+  Sometimes the answer is not unique; there may be several ways for
+  generating random objects. Like SpecialString in RushCheck, you can
+  also write an abstract random generator.
+
+  OK, after thinking about the question, we have to write a code.
+  To define random generators, we have to add a class method arbitrary
+  in YourClass.
+
+  require 'rushcheck/rushcheck'
+  class YourClass
+    extend Arbitrary
+
+    def self.arbitrary
+      ...
+    end
+  end
+
+  If you need to define a random proc which returns a object in
+  YourClass, you have to include Coarbitrary, also.
+
+  class YourClass
+    extend Arbitrary
+    include Coarbitrary
+
+    def self.arbitrary
+      ...
+    end
+
+    def coarbitrary(g)
+      ...
+    end
+  end
+
+  However, because it is little complecated to implement both
+  arbitrary and coarbitrary, let's focus how to implement arbitrary
+  first.
+
+  Let's consider the first example:
+
+  class Candy
+
+    def initialize(name, price)
+      @name, @price = name, price
+    end
+
+    def foo
+      ...
+    end
+
+    def bar
+      ...
+    end
+
+  end
+
+  To write random generator, we have to look up 'initialize'.
+  Here, assume that @name belongs String and @price belongs Integer.
+  
+  One simple random generator for Candy:
+
+  (1) using Gen#bind and Gen.unit
+  class Candy
+    extend Arbitrary
+
+    def self.arbitrary
+      Integer.arbitrary.bind do |name|
+        String.arbitrary.bind do |price|
+          Gen.unit(new(name, price))
+        end
+      end
+    end
+  end
+
+  Puzzled? OK, they can be readed as follows:
+
+    take a random (arbitrary) integer and call it 'name'
+      take a random string and call it 'price'
+        return a Gen object which has a new Candy(name, price)
+
+  In general, the class method arbitrary should return a Gen object.
+  Check also gen.rb in RushCheck. There are several combinators to
+  create random generators.
+  
+  There are several way to implement random generators. The next
+  example is to use Gen.new without bind and unit.
+
+  (2) using Gen.new
+  class Candy
+    extend Arbitrary
+
+    def self.arbitrary
+      Gen.new do |n, r|
+        r2 = r
+        name, price = [Integer, String].map do |c|
+          r1, r2 = r2.split
+          c.arbitrary.value(n. r1)
+        end
+        new(name, price)
+      end
+    end
+  end
+
+  This pattern is useful if your class has many valiables for
+  initialize. Because binding patterns needs much depth of method call
+  chains, it may be failed. This technique is used to avoid the stack
+  overflow. This is one difference between Haskell and Ruby.
+
+  The implementation can be understanded as follows:
+    self.arbitrary returns a new Gen object.
+      let n be an integer and r be a random generator.
+      let r2 equal r
+      name and price are both random objects where
+        get new two random generator r1 and r2 from old r2
+        assign a random value by generating 'arbitrary.value(n, r1)'
+          and discard the random generator r1 
+
+  Note that we need new random generator for each random object.
+  Here we create new random generator by spliting. If you use same
+  random generator for generating different objects, then the
+  distribution of objects are same (not generated randomly).
+
+  Because sometimes the initialize of YourClass is complecated,
+  then the random generator self.arbitrary turns to be complecated
+  also.
+
+  In next sections, I will introduce several generators in gen.rb.
+  They may be useful to create your own random genrator. See also rdoc
+  of Gen.
+
+  6.2 Gen.choose
+
+  Gen.choose(lo, hi) returns a Gen object which generates a random
+  value in the bound.
+
+  example.  
+    Gen.choose(0, 10) # a generator of Integer in (0..10)
+
+  6.3 Gen.frequency
+
+  Gen.frequency requires an array of pair of Integer and Gen objects,
+  and returns a Gen object. Gen.frequency is used to define the
+  distribution of randomness.
+
+  example.
+    Gen.frequency([[3, Integer.arbitrary], [7, String.arbitrary]])
+      # return a random integer or a random string (by choosing
+      # randomly) Integer:30% String: 70%
+
+  See also SpecialString.
+
+  6.4 Gen.lift_array
+  (I don't like the name and may be changed in future)
+
+  Gen.lift_array takes an array and a block which has a variable.
+  The block should return a Gen object. lift_array returns a Gen
+  object which generates an array of the result of given block for
+  applying each member of given array.
+
+  example. 
+
+  class Candy
+    extend Arbitrary
+
+    def self.arbitrary
+      Gen.lift_array([Integer, String]) do |c| 
+        c.arbitrary
+      end.bind do |args|
+        new(*args)
+      end
+    end
+  end
+
+  6.5 Gen.oneof
+
+  Gen.oneof requires an array of Gen objects returns a Gen object.
+
+  example.
+    Gen.oneof([Integer.arbitrary, String.arbitrary])
+      # return a random integer or a random string (by choosing
+      # randomly)
+
+  6.6 Gen.promote
+
+  Gen.promote is used to generate a random Proc object.
+  See also proc.rb in RushCheck
+
+  6.7 Gen.rand
+  
+  Gen.rand is a random number generator.
+
+  6.8 Gen.sized
+
+  Gen.sized is used to change the size of random object.
+  See also some implementation in RushCheck (grep the source!)
+
+  6.9 Gen.unit
+
+  return Gen object.
+
+  6.10 Gen.vector
+
+  get a vector of Gen.
+
+  Gen.vector(Integer, 3) # => Gen [Integer, Integer, Integer]
+
+7. Further information
+
+  Webpage should have another useful information:
+    http://rushcheck.rubyforge.org/
+  The project page has a bug tracker and webboard.
+    http://rubyforge.org/projects/rushcheck/
+ 
+  There is no mailing list for RushCheck (now at 2006-08-08),
+  but don't hesitate to contact to the author!
+
+  Happy hacking and testing!
+
+   
+
