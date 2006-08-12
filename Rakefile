@@ -6,7 +6,7 @@ require 'rubygems'
 require 'rake'
 require 'rake/gempackagetask'
 
-RUSHCHECK_VERSION = '0.2'
+RUSHCHECK_VERSION = '0.4'
 
 spec = Gem::Specification.new do |s|
   s.name      = 'rushcheck'
