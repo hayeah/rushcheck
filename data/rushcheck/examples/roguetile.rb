@@ -60,7 +60,7 @@ end
 
 # ok, then let's test them and find a bug.
 
-require 'rushcheck/rushcheck'
+require 'rushcheck'
 
 class Tree
   extend Arbitrary

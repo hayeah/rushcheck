@@ -1,7 +1,7 @@
 # proc.rb
 # a sample of RushCheck
 
-require 'rushcheck/rushcheck'
+require 'rushcheck'
 
 class Proc
   # application

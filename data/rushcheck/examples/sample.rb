@@ -1,6 +1,6 @@
 # a simple example
 
-require 'rushcheck/rushcheck'
+require 'rushcheck'
 
 # first boring example
 def assert_sort

@@ -1,7 +1,7 @@
 # candy.rb
 # an example to write a random generator
 
-require 'rushcheck/rushcheck'
+require 'rushcheck'
 
 class Candy
 

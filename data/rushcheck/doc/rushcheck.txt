@@ -1,6 +1,6 @@
 RushCheck - a random testing tool for Ruby
-Tutorial for version 0.3
-2006-08-08 Daisuke IKEGAMI <ikegami@madscientist.jp>
+Tutorial for version 0.4
+2006-08-10 Daisuke IKEGAMI <ikegami@madscientist.jp>
 
 This document is a draft and may be obsoleted in future. 
 Check also the web page
@@ -20,7 +20,7 @@ Check also the web page
 
 1. add the following declaration to load RushCheck library
 
-     require 'rushcheck/rushcheck'
+     require 'rushcheck'
 
 2. and require also your library file if the class you want to test is
    included in it. 

@@ -4,7 +4,7 @@
 # this news tells that a japanese handy-phone hungs when it receives
 # an email which contains the special format string "%s".
 
-require 'rushcheck/rushcheck'
+require 'rushcheck'
 
 def malformed_format_string
   Assertion.new(String) { |s|
