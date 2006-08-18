@@ -1,6 +1,6 @@
 RushCheck - a random testing tool for Ruby
 Tutorial for version 0.4
-2006-08-10 Daisuke IKEGAMI <ikegami@madscientist.jp>
+2006-08-18 Daisuke IKEGAMI <ikegami@madscientist.jp>
 
 This document is a draft and may be obsoleted in future. 
 Check also the web page
@@ -18,7 +18,16 @@ Check also the web page
 
 == Tutorial for writing testcase
 
-1. add the following declaration to load RushCheck library
+1. At first, we have to require the library.
+
+   If you have installed RushCheck using RubyGems, then you should add
+   the following two lines to your test codes.
+
+     require 'rubygems'
+     require_gem 'rushcheck'
+
+   Otherwise, if you have installed RushCheck by setup.rb, then 
+   add the simple one line.
 
      require 'rushcheck'
 
