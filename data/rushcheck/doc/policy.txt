@@ -537,6 +537,10 @@ QuickCheck.
   isBottom		-- :: a -> Bool
   bottom		-- :: a 		{- _|_ -}
 
+  private functions
+  tests :: Config -> Gen Result -> StdGen -> Int -> Int -> [[String]]
+           -> IO TestResult
+
 3.1 porting policy for QuickCheck.Batch in Haskell to Ruby
 
   = testoptions.rb
@@ -546,11 +550,16 @@ QuickCheck.
     length_of_tests :: Int,	-- ^ time limit for test, in seconds.
     debug_tests     :: Bool }
 
-  = testresult.rb
-  data TestResult = TestOk 	String  Int [[String]]
-     | TestExausted 	String  Int [[String]]
-     | TestFailed   [String] Int
-     | TestAborted   Exception
+  data TestResult = 
+     | TestOk       String  Int [[String]] -- message ntest stamps
+     | TestExausted String  Int [[String]] -- message ntest stamps
+     | TestFailed   [String] Int           -- results ntest
+     | TestAborted  Exception              -- exception
+
+  TestOk       ---> class TestOk
+  TestExausted ---> class TestExausted
+  TestFailed   ---> class TestFailed
+  TestAborted  ---> raise
 
   = testable.rb
   run      :: Testable a => a -> TestOptions -> IO TestResult
@@ -558,7 +567,29 @@ QuickCheck.
 
   isBottom and bottom have not been implemented in Ruby yet
 
-3.1.1 testoptions.rb
+  = config.rb
+  tests :: Config -> Gen Result -> StdGen -> Int -> Int -> [[String]]
+           -> IO TestResult
+
+3.1.1 testresult.rb
+
+  Haskell
+  data TestResult = 
+     | TestOk       String  Int [[String]] -- message ntest stamps
+     | TestExausted String  Int [[String]] -- message ntest stamps
+     | TestFailed   [String] Int           -- results ntest
+     | TestAborted  Exception              -- exception
+  -->
+  Ruby
+  class TestResult
+    attr_accessor :message, :ntest, :stamps
+  end
+  class TestOk       < TestResult; end;
+  class TestExausted < TestResult; end;
+  class TestFailed;  end;
+  exception is raised in runtime
+
+3.1.2 testoptions.rb
 
   Haskell
   defOpt   :: TestOptions
@@ -573,26 +604,6 @@ QuickCheck.
 
   defOpt can be implemented as the default varues of initialize
 
-3.1.2 testresult.rb
-
-  Haskell
-  data TestResult = 
-       TestOk       String Int [[String]]
-     | TestExausted String  Int [[String]]
-     | TestFailed   [String] Int
-     | TestAborted  Exception
-  --->
-  Ruby
-  class TestResult # an abstract class
-  class TestOk < TestResult
-  TestOk#initialize(mes, ntests, stamps)
-  class TestExausted < TestResult
-  TestExausted#initialize(mes, ntests, stamps)
-  class TestFailed < TestResult
-  TestFailed#initialize(args, ntest)
-  class TestAborted < TestResult
-  TestAborted#initialize(ex)
-
 3.1.3 testable.rb
 
   Haskell
@@ -600,8 +611,17 @@ QuickCheck.
   runTests :: String -> TestOptions -> [TestOptions -> IO TestResult] -> IO ()
   --->
   Ruby
-  Testable#testcase  :: [nil, Proc] with block {|opts::TestOptions| ...}
-  Testable#run(opts) :: [TestOptions, Bool]
+  Testable#run :: [[TestOptions], Result]
   Testable#run_tests(mes, opts, tests) 
     :: [[String, TestOptions. [Proc]], [Bool]]
    should return results
+
+3.1.4 config.rb
+
+  Haskell
+  tests :: Config -> Gen Result -> StdGen -> Int -> Int -> [[String]]
+           -> IO TestResult
+  --->
+  Ruby
+  RushCheckConfig#batch(n, v)
+  RushCheckConfig#test_batch
