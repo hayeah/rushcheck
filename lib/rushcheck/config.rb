@@ -1,6 +1,8 @@
 # = Config.rb
 # This file is implemented for the class RushCheckConfig.
 
+require 'testresult'
+
 # RushCheckConfig is a class which has configurations of tests.
 # This class is needed for several test functions.
 class RushCheckConfig
@@ -21,6 +23,14 @@ class RushCheckConfig
         Proc.new{|x| x / 2 + 3},
         Proc.new do |n, args|
           n.to_s + ":\n" + args.join("\n") + "\n"
+        end)
+  end
+
+  def self.batch(n, v)
+    new(n, n * 10, 
+        Proc.new{|x| (x / 2 + 3).to_i},
+        Proc.new do |n, args|
+          v ? n.to_s + ":\n" + args.join("\n") + "\n" : ""
         end)
   end
 
@@ -93,6 +103,42 @@ class RushCheckConfig
     end
     
     tests_result
+  end
+
+  def test_batch(gen, rnd, nt=1, nf=0, stamps=[])
+    ntest, nfail = nt, nf
+    while true
+      if ntest > max_test
+        tests_result = TestOk.new("OK, passed", ntest, stamps)
+        break
+      end
+      if nfail > max_fail
+        test_result = TestExausted.new('Arguments exhausted after ', ntest, stamps)
+        break
+      end
+      
+      rnd_l, rnd_r = rnd.split
+      result = gen.generate(size.call(ntest), rnd_r)
+      message = every.call(ntest, result.arguments)
+      print message # don't puts
+
+      case result.ok
+      when nil
+        nfail += 1
+        redo
+      when true
+        stamps.push(result.stamp)
+        ntest += 1
+        redo
+      when false
+        tests_result = TestFailed.new(result.arguments, ntest)
+        break
+      else
+        raise(RuntimeError, "RushCheck: illegal result")
+      end
+    end    
+
+    test_result
   end
 
 end
