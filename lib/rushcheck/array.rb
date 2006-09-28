@@ -18,8 +18,8 @@ class RandomArray < Array
   end
   
   def self.arbitrary
-    Gen.sized do |m|
-      Gen.choose(0..m) do |len|
+    RushCheck::Gen.sized do |m|
+      RushCheck::Gen.choose(0, m).bind do |len|
         if len = 0
         then Gen.unit([])
         else
