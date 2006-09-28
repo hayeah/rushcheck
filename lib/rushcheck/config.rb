@@ -1,7 +1,7 @@
 # = Config.rb
 # This file is implemented for the class RushCheckConfig.
 
-require 'testresult'
+require 'rushcheck/testresult'
 
 # RushCheckConfig is a class which has configurations of tests.
 # This class is needed for several test functions.
