@@ -4,6 +4,7 @@
 # Therefore check also the Haskell implementation.
 
 require 'rushcheck/gen'
+require 'rushcheck/integer'
 
 # Gen provides functions for generating test instances.
 class Gen
