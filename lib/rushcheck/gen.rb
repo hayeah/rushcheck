@@ -28,35 +28,47 @@ class Gen
       nguard = f.arity - xs.length
       guards = nguard >= 0 ? Array.new(nguard, Guard.new) : []
 
-      try = 0
-      begin
-        if try > @@max_create 
-          raise(RuntimeError, "Failed to guards too many.") 
-        end
-        args = xs.map do |gen|
-          r1, r2 = r2.split
-          gen.value(n, r1)
-        end
-        ys = args + guards
-        f.call(*ys)
-      rescue Exception => ex
-        case ex
-        when RushCheckGuard
-          try += 1
-          retry
-        else
-          raise(ex, ex.to_s)
+    # create_gen is one of primitive generators to create a random Gen object.
+    # create_gen takes an array of Gen objects, and any block to generate object.
+    # Then create_gen returns a Gen object. It may useful to implement
+    # arbitrary method into your class.
+    def self.create_by_gen(xs, &f)
+      self.new do |n, r|
+        r2 = r
+        nguard = f.arity - xs.length
+        guards = nguard >= 0 ? Array.new(nguard, RushCheck::Guard.new) : []
+
+        try = 0
+        begin
+          if try > @@max_create 
+            raise(RuntimeError, "Failed to guards too many.") 
+          end
+          args = xs.map do |gen|
+            r1, r2 = r2.split
+            gen.value(n, r1)
+          end
+          ys = args + guards
+          f.call(*ys)
+        rescue Exception => ex
+          case ex
+          when RushCheck::GuardException
+            try += 1
+            retry
+          else
+            raise(ex, ex.to_s)
+          end
         end
       end
     end
   end
 
-  # elements is one of primitive generators to create a random Gen
-  # object. elements requires an array and returns a Gen object which
-  # generates an object in the array randomly. It may useful to
-  # implement arbitrary method into your class. 
-  def self.elements(xs)
-    raise(RuntimeError, "given argument is empty") if xs.empty?
+    # create is one of primitive generators to create a random Gen object.
+    # create takes an array of classes, and any block to generate object.
+    # Then create returns a Gen object. It may useful to implement
+    # arbitrary method into your class.
+    def self.create(cs, &f)
+      self.create_by_gen(cs.map {|c| c.arbitrary}) { yield f }
+    end
 
     choose(0, xs.length - 1).fmap {|i| xs[i] }
   end
