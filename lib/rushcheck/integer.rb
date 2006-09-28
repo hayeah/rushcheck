@@ -28,10 +28,14 @@ class Integer
 
   # this method is needed to include HsRandom.
   def self.random_range(gen, lo=@@min_bound, hi=@@max_bound)
-    raise(RuntimeError, "illegal arguments:#{lo}, #{hi}") if hi - lo + 1 == 0
+    hi, lo = lo, hi if hi < lo 
     v, g = gen.gen_next
+    d = hi - lo + 1
 
-    [(v % (hi - lo + 1)) + lo, g]
+    if d == 1
+    then [lo, g]
+    else [(v % d) + lo, g]
+    end
   end
 
   # this method is needed to use Coarbitrary.
