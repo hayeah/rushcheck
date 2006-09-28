@@ -5,22 +5,26 @@
 require 'rushcheck/property'
 require 'rushcheck/testable'
 
-class Result
+module RushCheck
 
-  include Testable
+  class Result
 
-  def self.nothing
-    Result.new(false)
+    include RushCheck::Testable
+
+    def self.nothing
+      RushCheck::Result.new(false)
+    end
+
+    attr_reader :ok, :stamp, :arguments
+    def initialize(ok=nil, stamp=[], arguments=[])
+      @ok, @stamp, @arguments = ok, stamp, arguments
+    end
+
+    def result
+      RushCheck::Property.new(@ok, @stamp, @arguments)
+    end
+    alias property :result
+
   end
-
-  attr_reader :ok, :stamp, :arguments
-  def initialize(ok=nil, stamp=[], arguments=[])
-    @ok, @stamp, @arguments = ok, stamp, arguments
-  end
-
-  def result
-    Property.new(@ok, @stamp, @arguments)
-  end
-  alias property :result
 
 end

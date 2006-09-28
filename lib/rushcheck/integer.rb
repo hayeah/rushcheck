@@ -9,9 +9,10 @@ require 'rushcheck/random'
 # ruby's Integer class is extended to use RushCheck library.
 # See also HsRandom, Arbitrary and Coarbitrary.
 class Integer
-  extend HsRandom
-  extend Arbitrary
-  include Coarbitrary
+  extend RushCheck::HsRandom
+  extend RushCheck::Arbitrary
+
+  include RushCheck::Coarbitrary
 
   @@max_bound =  2**30 - 1
   @@min_bound = -(2**30)
@@ -23,7 +24,7 @@ class Integer
 
   # this method is needed to use Arbitrary.
   def self.arbitrary
-    Gen.sized {|n| Gen.choose(-n, n) }
+    RushCheck::Gen.sized {|n| RushCheck::Gen.choose(-n, n) }
   end
 
   # this method is needed to include HsRandom.

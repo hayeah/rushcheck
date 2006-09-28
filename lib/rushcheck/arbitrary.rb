@@ -6,23 +6,27 @@
 # However they are abstract methods and should be overrided
 # in each class after include/extend them.
 
-module Arbitrary
+module RushCheck
 
-  # It is assumed that the arbitrary method must be overrided
-  # and return a Gen object with the same class of self. 
-  # See also rushcheck/gen.rb.
-  def arbitrary
-    raise(NotImplementedError, "This method should be overrided.")
+  module Arbitrary
+
+    # It is assumed that the arbitrary method must be overrided
+    # and return a Gen object with the same class of self. 
+    # See also rushcheck/gen.rb.
+    def arbitrary
+      raise(NotImplementedError, "This method should be overrided.")
+    end
+
   end
 
-end
+  module Coarbitrary
 
-module Coarbitrary
+    # It is assumed that the coarbitrary method must be overrided
+    # and return a Gen object. See also rushcheck/gen.rb.
+    def coarbitrary(g)
+      raise(NotImplementedError, "This method should be overrided.")
+    end
 
-  # It is assumed that the coarbitrary method must be overrided
-  # and return a Gen object. See also rushcheck/gen.rb.
-  def coarbitrary(g)
-    raise(NotImplementedError, "This method should be overrided.")
   end
 
 end

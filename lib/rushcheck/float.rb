@@ -7,16 +7,16 @@ require 'rushcheck/random'
 
 class Float
   
-  extend Arbitrary
-  extend HsRandom
+  extend RushCheck::Arbitrary
+  extend RushCheck::HsRandom
   
-  include Coarbitrary
+  include RushCheck::Coarbitrary
 
   @@min_bound = 0.0
   @@max_bound = 1.0
 
   def self.arbitrary
-    Gen.new do |n, r|
+    RushCheck::Gen.new do |n, r|
       a, b, c = (1..3).map { Integer.arbitrary.value(n, r) }
       a + (b / (c.abs + 1))
     end

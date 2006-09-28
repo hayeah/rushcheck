@@ -7,25 +7,27 @@ require 'rushcheck/random'
 require 'rushcheck/result'
 require 'rushcheck/testable'
 
-module RandomBool
-  def arbitrary
-    Gen.elements([true, false])
-  end
-  
-  def random_range(gen, lo=@@min_bound, hi=@@max_bound)
-    v, g = Integer.random_range(gen, 0, 1)
-    [v==0, g]
+module RushCheck
+  module RandomBool
+    def arbitrary
+      RushCheck::Gen.elements([true, false])
+    end
+    
+    def random_range(gen, lo=@@min_bound, hi=@@max_bound)
+      v, g = Integer.random_range(gen, 0, 1)
+      [v==0, g]
+    end
   end
 end
 
 class TrueClass
 
-  extend Arbitrary
-  extend HsRandom
-  extend RandomBool
+  extend RushCheck::Arbitrary
+  extend RushCheck::HsRandom
+  extend RushCheck::RandomBool
 
-  include Testable
-  include Coarbitrary
+  include RushCheck::Testable
+  include RushCheck::Coarbitrary
 
   @@min_bound = 0
   @@max_bound = 1
@@ -39,19 +41,19 @@ class TrueClass
   end
 
   def property
-    Result.new(self).result
+    RushCheck::Result.new(self).result
   end
 
 end
 
 class FalseClass
 
-  extend Arbitrary
-  extend HsRandom
-  extend RandomBool
+  extend RushCheck::Arbitrary
+  extend RushCheck::HsRandom
+  extend RushCheck::RandomBool
 
-  include Coarbitrary
-  include Testable
+  include RushCheck::Coarbitrary
+  include RushCheck::Testable
 
   @@min_bound = 0
   @@max_bound = 1
@@ -65,15 +67,15 @@ class FalseClass
   end
   
   def property
-    Result.new(self).result
+    RushCheck::Result.new(self).result
   end
 end
 
 class NilClass
-  extend Arbitrary
+  extend RushCheck::Arbitrary
 
-  include Coarbitrary
-  include Testable
+  include RushCheck::Coarbitrary
+  include RushCheck::Testable
   
   def self.arbitrary
     Gen.unit(nil)
@@ -84,7 +86,7 @@ class NilClass
   end
 
   def property
-    Result.nothing
+    RushCheck::Result.nothing
   end
 
 end

@@ -9,19 +9,19 @@ require 'rushcheck/random'
 
 class String
 
-  extend Arbitrary
-  extend HsRandom
+  extend RushCheck::Arbitrary
+  extend RushCheck::HsRandom
 
-  include Coarbitrary
+  include RushCheck::Coarbitrary
 
   @@min_range = 0
   @@max_range = 1024
 
   def self.arbitrary
-    Gen.sized do |n|
-      Gen.choose(0, n).bind do |len|
-        Gen.vector(Integer, len).bind do |xs|
-          Gen.unit(xs.map{|x| (x % 128).chr}.join)
+    RushCheck::Gen.sized do |n|
+      RushCheck::Gen.choose(0, n).bind do |len|
+        RushCheck::Gen.vector(Integer, len).bind do |xs|
+          RushCheck::Gen.unit(xs.map{|x| (x % 128).chr}.join)
         end
       end
     end
@@ -80,17 +80,17 @@ class SpecialString < String
     [f['alphabet'],f['control'],f['number'],f['special']].zip(
     [ @@alphabet,   @@control,   @@number,   @@special]) do 
       |weight, table|
-        gen = Gen.oneof(table.map {|n| Gen.unit(n.chr)})
+        gen = RushCheck::Gen.oneof(table.map {|n| RushCheck::Gen.unit(n.chr)})
         frq << [weight, gen]
     end
 
-    Gen.sized do |m|
-      Gen.choose(0, m).bind do |len|
-        Gen.new do |n, r|
+    RushCheck::Gen.sized do |m|
+      RushCheck::Gen.choose(0, m).bind do |len|
+        RushCheck::Gen.new do |n, r|
           r2 = r
           (1..len).map do
             r1, r2 = r2.split
-            Gen.frequency(frq).value(n, r1)
+            RushCheck::Gen.frequency(frq).value(n, r1)
           end.join
         end
       end

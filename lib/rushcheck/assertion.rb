@@ -7,61 +7,66 @@ require 'rushcheck/property'
 require 'rushcheck/result'
 require 'rushcheck/testable'
 
-# Assertion class is one of main features of RushCheck.
-# You can write a testcase for random testing as follows:
-# 
-# Assertion.new(Integer, String) do |x, y, g|
-#   g.guard { precondition }
-#   body
-# end
-#
-# See also documents and several examples.
-#
-class Assertion
-  
-  include Testable
+module RushCheck
 
-  def initialize(*xs, &f)
-    @inputs = xs[0..(f.arity - 1)]
-    @nguard = f.arity - xs.length 
-    @proc = f
-  end
+  # Assertion class is one of main features of RushCheck.
+  # You can write a testcase for random testing as follows:
+  # 
+  # Assertion.new(Integer, String) do |x, y, g|
+  #   g.guard { precondition }
+  #   body
+  # end
+  #
+  # See also documents and several examples.
+  #
+  class Assertion
+    
+    include RushCheck::Testable
 
-  def property
-    Property.new(Gen.new do |n, r|
-      r2 = r
-      if @inputs
-      then
-        @inputs.map do |c|
-          r1, r2 = r2.split
-          c.arbitrary.value(n, r1)
+    def initialize(*xs, &f)
+      @inputs = xs[0..(f.arity - 1)]
+      @nguard = f.arity - xs.length 
+      @proc = f
+    end
+
+    def property
+      g = RushCheck::Gen.new do |n, r|
+        r2 = r
+        if @inputs
+        then
+          @inputs.map do |c|
+            r1, r2 = r2.split
+            c.arbitrary.value(n, r1)
+          end
+        else
+          []
         end
-      else
-        []
-      end
-    end.bind do |args|
-      guards = @nguard >= 0 ? Array.new(@nguard, Guard.new) : []
-      test = begin
-               xs = args + guards
-               @proc.call(*xs)
-             rescue Exception => ex
-               case ex
-               when RushCheckGuard
-                 Result.new(nil)
-               else
-                 err = "Unexpected exception: #{ex.inspect}\n" + 
-                       ex.backtrace.join("\n")
-                 Result.new(false, [], [err])
+      end.bind do |args|
+        guards = @nguard >= 0 ? Array.new(@nguard, RushCheck::Guard.new) : []
+        test = begin
+                 xs = args + guards
+                 @proc.call(*xs)
+               rescue Exception => ex
+                 case ex
+                 when RushCheck::GuardException
+                   RushCheck::Result.new(nil)
+                 else
+                   err = "Unexpected exception: #{ex.inspect}\n" + 
+                     ex.backtrace.join("\n")
+                   RushCheck::Result.new(false, [], [err])
+                 end
                end
-             end
-      # not use ensure here because ensure clause
-      # does not return values
-      test.property.gen.bind do |res|
-        res.arguments << args.inspect
-        Gen.unit(res)
+        # not use ensure here because ensure clause
+        # does not return values
+        test.property.gen.bind do |res|
+          res.arguments << args.inspect
+          RushCheck::Gen.unit(res)
+        end
       end
-    end)
+
+      RushCheck::Property.new(g)
+    end
+
   end
 
 end
-

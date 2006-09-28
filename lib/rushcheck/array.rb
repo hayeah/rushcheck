@@ -10,20 +10,21 @@ require 'rushcheck/testable'
 # user defined generators.
 class RandomArray < Array
 
-  extend Arbitrary
-  include Coarbitrary
+  extend RushCheck::Arbitrary
+  include RushCheck::Coarbitrary
 
   def self.set_pattern(base, &f)
     @@base, @@indp = base, f
+    self
   end
   
   def self.arbitrary
     RushCheck::Gen.sized do |m|
       RushCheck::Gen.choose(0, m).bind do |len|
         if len = 0
-        then Gen.unit([])
+        then RushCheck::Gen.unit([])
         else
-          Gen.new do |n, r|
+          RushCheck::Gen.new do |n, r|
             ary = [@@base.arbitrary.value(n, r)]
             r2 = r
             (1..len).each do |i|

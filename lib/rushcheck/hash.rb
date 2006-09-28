@@ -9,8 +9,8 @@ require 'rushcheck/testable'
 # defined random generator of Hash.
 class RandomHash < Hash
 
-  extend Arbitrary
-  include Coarbitrary
+  extend RushCheck::Arbitrary
+  include RushCheck::Coarbitrary
 
   # class method set_pattern takes a hash object of
   # random pattern. For example, the following pattern
@@ -20,10 +20,11 @@ class RandomHash < Hash
   # has indicated random object as its values.
   def self.set_pattern(pat)
     @@pat = pat
+    self
   end
   
   def self.arbitrary
-    Gen.new do |n, r|
+    RushCheck::Gen.new do |n, r|
       h = {}
       r2 = r
       @@pat.keys.each do |k|
