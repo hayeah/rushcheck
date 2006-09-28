@@ -467,8 +467,7 @@ Check also the web page
     extend Arbitrary
 
     def self.arbitrary
-      xs = [String, Integer].map {|c| c.arbitrary}
-      Gen.create(xs) do |name, price, g|
+      Gen.create(String, Integer) do |name, price, g|
         g.guard { price >= 0 }
         new(name, price)
       end
@@ -485,6 +484,9 @@ Check also the web page
   In this case, this is more efficient to generate random instance
   than with the guard. However, sometimes we don't have this kind
   trick and we can use some guards.
+
+  Remark: from version 0.4, Gen.create is changed to require classes 
+  in its argument from Gen objects. 
 
   (2) using Gen#bind and Gen.unit
   class Candy
