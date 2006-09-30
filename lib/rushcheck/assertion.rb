@@ -58,9 +58,9 @@ module RushCheck
                end
         # not use ensure here because ensure clause
         # does not return values
-        test.property.gen.bind do |res|
+        test.property.gen.fmap do |res|
           res.arguments << args.inspect
-          RushCheck::Gen.unit(res)
+          res
         end
       end
 

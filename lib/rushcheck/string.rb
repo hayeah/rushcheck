@@ -20,8 +20,8 @@ class String
   def self.arbitrary
     RushCheck::Gen.sized do |n|
       RushCheck::Gen.choose(0, n).bind do |len|
-        RushCheck::Gen.vector(Integer, len).bind do |xs|
-          RushCheck::Gen.unit(xs.map{|x| (x % 128).chr}.join)
+        RushCheck::Gen.vector(Integer, len).fmap do |xs|
+          xs.map{|x| (x % 128).chr}.join
         end
       end
     end
