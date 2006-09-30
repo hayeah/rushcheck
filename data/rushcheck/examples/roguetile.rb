@@ -63,11 +63,11 @@ end
 require 'rushcheck'
 
 class Tree
-  extend Arbitrary
-  include Coarbitrary
+  extend RushCheck::Arbitrary
+  include RushCheck::Coarbitrary
 
   def self.arbitrary
-    Gen.frequency([[3, Leaf.arbitrary], [1, Branch.arbitrary]])
+    RushCheck::Gen.frequency([[3, Leaf.arbitrary], [1, Branch.arbitrary]])
   end
 
   # In this example, coarbitrary isn't needed, however,
@@ -78,11 +78,11 @@ class Tree
 end
 
 class Leaf
-  extend Arbitrary
-  include Coarbitrary
+  extend RushCheck::Arbitrary
+  include RushCheck::Coarbitrary
   
   def self.arbitrary
-    Integer.arbitrary.bind {|x| Gen.unit(new(x)) }
+    Integer.arbitrary.bind {|x| RushCheck::Gen.unit(new(x)) }
   end
 
   def coarbitrary(g)
@@ -91,11 +91,11 @@ class Leaf
 end
 
 class Branch
-  extend Arbitrary
-  include Coarbitrary
+  extend RushCheck::Arbitrary
+  include RushCheck::Coarbitrary
 
   def self.arbitrary
-    Gen.new do |n, g|
+    RushCheck::Gen.new do |n, g|
       g2 = g
       v, l, r = [Integer.arbitrary, Tree.arbitrary, Tree.arbitrary].map do |x|
         g1, g2 = g2.split
@@ -111,15 +111,15 @@ class Branch
 end
 
 def prop_leaf_add
-  Assertion.new(Leaf) {|x| x.add == x.value }.check
+  RushCheck::Assertion.new(Leaf) {|x| x.add == x.value }.check
 end
 
 def prop_leaf_multiply
-  Assertion.new(Leaf) {|x| x.multiply == x.value }.check
+  RushCheck::Assertion.new(Leaf) {|x| x.multiply == x.value }.check
 end
 
 def prop_branch_add
-  Assertion.new(Branch) do |t|
+  RushCheck::Assertion.new(Branch) do |t|
     t.add == t.value + t.left.add + t.right.add
   end.check
 end
@@ -129,7 +129,7 @@ def prop_branch_multiply
   # If the tester write a wrong test case by copying the code snippet?
   # Then we will meet the same problem! Even this test is passed, but
   # it is wrong.
-  Assertion.new(Branch) do |t|
+  RushCheck::Assertion.new(Branch) do |t|
     t.add == t.value * t.left.add + t.right.add # Oops, a bug in testcase.
   end.check
 end
@@ -137,13 +137,13 @@ end
 # But, we can test another /primitive/ properties about
 # branch_multiply.
 def prop_branch_multiply_zero
-  Assertion.new(Leaf) do |x|
+  RushCheck::Assertion.new(Leaf) do |x|
     Branch.new(0, x, x).multiply == 0
   end.check
 end
 
 def prop_branch_multiply_power
-  Assertion.new(Leaf) do |x|
+  RushCheck::Assertion.new(Leaf) do |x|
     Branch.new(1, x, x).multiply == x.value * x.value
   end.check
 end

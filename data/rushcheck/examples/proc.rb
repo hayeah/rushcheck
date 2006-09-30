@@ -13,11 +13,11 @@ class Proc
   end
 end
 
-class MyRandomProc < RandomProc; end
+class MyRandomProc < RushCheck::RandomProc; end
 
 def associativity_integer
   MyRandomProc.set_pattern([Integer], [Integer])
-  Assertion.new(MyRandomProc, MyRandomProc, MyRandomProc, Integer) do
+  RushCheck::Assertion.new(MyRandomProc, MyRandomProc, MyRandomProc, Integer) do
     |a, b, c, x|
     (a ** (b ** c)).call(x) == ((a ** b) ** c).call(x)
   end.check
@@ -26,7 +26,7 @@ end
 # this test takes much time than associativity_integer
 def associativity_string
   MyRandomProc.set_pattern([String], [String])
-  Assertion.new(MyRandomProc, MyRandomProc, MyRandomProc, String) do
+  RushCheck::Assertion.new(MyRandomProc, MyRandomProc, MyRandomProc, String) do
     |a, b, c, x|
     (a ** (b ** c)).call(x) == ((a ** b) ** c).call(x)
   end.check

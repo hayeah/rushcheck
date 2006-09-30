@@ -7,7 +7,7 @@
 require 'rushcheck'
 
 def malformed_format_string
-  Assertion.new(String) { |s|
+  RushCheck::Assertion.new(String) { |s|
     sprintf(s)
     true
   }.check
@@ -15,7 +15,7 @@ end
 
 def malformed_format_string2
   # SpecialString is used to find special format more likely
-  Assertion.new(SpecialString) { |s|
+  RushCheck::Assertion.new(SpecialString) { |s|
     sprintf(s)
     true
   }.check

@@ -5,7 +5,7 @@ require 'rushcheck'
 
 class Candy
 
-  extend Arbitrary
+  extend RushCheck::Arbitrary
 
   def initialize(name, price)
     raise unless price >= 0
@@ -14,7 +14,7 @@ class Candy
 
   def self.arbitrary
     xs = [String, Integer].map {|c| c.arbitrary}
-    Gen.create(xs) do |name, price, g|
+    RushCheck::Gen.create(xs) do |name, price, g|
       g.guard { price >= 0 }
       new(name, price)
     end
