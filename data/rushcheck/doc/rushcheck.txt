@@ -53,7 +53,7 @@ Check also the web page
    Array. The following assertion is a simple testcase:
 
      ast_zero = 
-       Assertion.new() do 
+       RushCheck::Assertion.new() do 
          [].sort == []
        end
 
@@ -64,7 +64,7 @@ Check also the web page
    Let's see another example:
 
      ast_one = 
-       Assertion.new(Integer) do |x|
+       RushCheck::Assertion.new(Integer) do |x|
          [x].sort == [x]
        end
 
@@ -99,7 +99,7 @@ Check also the web page
    assertion. 
 
      ast_two = 
-       Assertion.new(Integer, Integer) do |x, y|
+       RushCheck::Assertion.new(Integer, Integer) do |x, y|
          [x, y].sort == [x, y]
        end
 
@@ -206,7 +206,7 @@ Check also the web page
   integers. In similar way, we can define the assertions for any float
   numbers or any string. 
 
-     Assertion.new(Float, String, ...) do |x, y,..., g, ...|
+     RushCheck::Assertion.new(Float, String, ...) do |x, y,...|
        # ...
      end
 
@@ -252,10 +252,10 @@ Check also the web page
   called 'malformed format bug'.
 
     malformed_format_string =
-      Assertion.new(String) { |s| sprintf(s); true}
+      RushCheck::Assertion.new(String) { |s| sprintf(s); true}
 
     malformed_format_string2 =
-      Assertion.new(SpecialString) { |s| sprintf(s); true}
+      RushCheck::Assertion.new(SpecialString) { |s| sprintf(s); true}
  
   irb> malformed_format_string.check
   Falsifiable, after 86 tests:
@@ -378,7 +378,7 @@ Check also the web page
 
   def associativity_integer
     MyRandomProc.set_pattern([Integer], [Integer])
-    Assertion.new(MyRandomProc, MyRandomProc, MyRandomProc, Integer) do
+    RushCheck::Assertion.new(MyRandomProc, MyRandomProc, MyRandomProc, Integer) do
       |a, b, c, x|
       (a ** (b ** c)).call(x) == ((a ** b) ** c).call(x)
     end.check
@@ -395,7 +395,7 @@ Check also the web page
   6.1 Understand your class. What is a random object?
 
   To use your class in the assertion, like follows
-    Assertion.new(YourClass) {...}
+    RushCheck::Assertion.new(YourClass) {...}
   you have to write a code which generates a random object in your
   class. Therefore, at first we have to consider
     what is a random object in YourClass?
@@ -410,7 +410,7 @@ Check also the web page
 
   require 'rushcheck/rushcheck'
   class YourClass
-    extend Arbitrary
+    extend RushCheck::Arbitrary
 
     def self.arbitrary
       ...
@@ -421,8 +421,8 @@ Check also the web page
   YourClass, you have to include Coarbitrary, also.
 
   class YourClass
-    extend Arbitrary
-    include Coarbitrary
+    extend RushCheck::Arbitrary
+    include RushCheck::Coarbitrary
 
     def self.arbitrary
       ...
@@ -490,13 +490,13 @@ Check also the web page
 
   (2) using Gen#bind and Gen.unit
   class Candy
-    extend Arbitrary
+    extend RushCheck::Arbitrary
 
     def self.arbitrary
       String.arbitrary.bind do |name|
         Integer.arbitrary.bind do |price|
           price = - price if price < 0   # trick
-          Gen.unit(new(name, price))
+          RushCheck::Gen.unit(new(name, price))
         end
       end
     end
@@ -517,10 +517,10 @@ Check also the web page
 
   (3) using Gen.new
   class Candy
-    extend Arbitrary
+    extend RushCheck::Arbitrary
 
     def self.arbitrary
-      Gen.new do |n, r|
+      RushCheck::Gen.new do |n, r|
         r2 = r
         name, price = [String, Integer].map do |c|
           r1, r2 = r2.split
@@ -573,7 +573,7 @@ Check also the web page
   generators for expensive candy instance.
 
     lo = 100000
-    g = Gen.sized { |n| Gen.choose(lo, n + lo)}
+    g = RushCheck::Gen.sized { |n| RushCheck::Gen.choose(lo, n + lo)}
     xs = [String.arbitrary, g]
 
   See gen.rb and the following sections in details for how to get
@@ -611,10 +611,10 @@ Check also the web page
   example. 
 
   class Candy
-    extend Arbitrary
+    extend RushCheck::Arbitrary
 
     def self.arbitrary
-      Gen.lift_array([Integer, String]) do |c| 
+      RushCheck::Gen.lift_array([Integer, String]) do |c| 
         c.arbitrary
       end.bind do |args|
         new(*args)
