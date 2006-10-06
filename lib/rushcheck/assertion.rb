@@ -24,8 +24,8 @@ module RushCheck
     include RushCheck::Testable
 
     def initialize(*xs, &f)
+      raise ArgumentError unless f.arity == xs.length
       @inputs = xs[0..(f.arity - 1)]
-      @nguard = f.arity - xs.length 
       @proc = f
     end
 
@@ -42,10 +42,8 @@ module RushCheck
           []
         end
       end.bind do |args|
-        guards = @nguard >= 0 ? Array.new(@nguard, RushCheck::Guard.new) : []
         test = begin
-                 xs = args + guards
-                 @proc.call(*xs)
+                 @proc.call(*args)
                rescue Exception => ex
                  case ex
                  when RushCheck::GuardException

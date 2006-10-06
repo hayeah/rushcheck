@@ -1,31 +1,26 @@
 # = guard.rb
-# This provides class Guard
+# This provides module functions guard and its friends
 
 module RushCheck
 
   class GuardException < StandardError; end
 
-  # class Guard is used for RushCheck internally and many user
-  # don't care about this class.
-  class Guard
-    
-    def guard_raise(c)
-      begin
-        yield
-      rescue Exception => ex
-        case ex
-        when c
-          raise RushCheck::GuardException
-        else
-          raise ex
-        end
+  def guard
+    raise RushCheck::GuardException unless yield
+  end
+
+  def guard_raise(c)
+    begin
+      yield
+    rescue Exception => ex
+      case ex
+      when c
+        raise RushCheck::GuardException
+      else
+        raise ex
       end
     end
-
-    def guard
-      raise RushCheck::GuardException unless yield
-    end
-
   end
+  module_function :guard, :guard_raise
 
 end

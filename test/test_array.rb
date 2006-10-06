@@ -11,13 +11,19 @@ class TC_RandomArray < Test::Unit::TestCase
   def teardown
   end
 
-  class TestBaseArray < RandomArray; end
-  def test_set_pattern_base
-    RushCheck::Assertion.new(Integer, Integer, Integer) do |x, i, n, g|
-      g.guard {i > 0}
-      TestBaseArray.set_pattern(x) {|j| nil}
-      a = TestBaseArray.arbitrary.value(n, RushCheck::StdGen.new)
-      a.empty? || (a.first == x && a[i].nil?)
+  class TestSPArray < RandomArray; end
+  def test_set_pattern
+    RushCheck::Assertion.new(Integer, Integer, Integer) do |x, i, n|
+      RushCheck::guard {i > 0}
+      TestSPArray.set_pattern(x) {|j| j}
+      a = TestSPArray.arbitrary.value(n, RushCheck::StdGen.new)
+      len = a.length
+      case len
+      when 0
+        a.empty? 
+      else 
+        RushCheck::Gen.choose(0, len - 1).bind {|i| (a.first == x && a[i]==i)}
+      end
     end.quick_check
   end
 

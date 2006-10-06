@@ -26,8 +26,8 @@ end
 # if given array is already sorted, then the
 # assertion turns true.
 def assert_sort_two_sorted
-  RushCheck::Assertion.new(Integer, Integer) { |x, y, g|
-    g.guard {x <= y}
+  RushCheck::Assertion.new(Integer, Integer) { |x, y|
+    RushCheck::guard {x <= y}
     ary = [x, y]
     ary.sort == ary
   }.check
@@ -35,16 +35,16 @@ end
 
 # watch statistics 
 def assert_sort_two_sorted_trivial
-  RushCheck::Assertion.new(Integer, Integer) { |x, y, g|
-    g.guard {x <= y}
+  RushCheck::Assertion.new(Integer, Integer) { |x, y|
+    RushCheck::guard {x <= y}
     ary = [x, y]
     (ary.sort == ary).trivial{x == y}
   }.check
 end
 
 def assert_sort_two_sorted_classify
-  RushCheck::Assertion.new(Integer, Integer) { |x, y, g|
-    g.guard {x <= y}
+  RushCheck::Assertion.new(Integer, Integer) { |x, y|
+    RushCheck::guard {x <= y}
     ary = [x, y]
     (ary.sort == ary).classify('same'){x == y}.
       classify('bit diff') { (x - y).abs == 1 }

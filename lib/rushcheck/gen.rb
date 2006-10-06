@@ -25,22 +25,20 @@ module RushCheck
     # Then create_gen returns a Gen object. It may useful to implement
     # arbitrary method into your class.
     def self.create_by_gen(xs, &f)
+      raise ArgumentError unless f.arity == xs.length
       self.new do |n, r|
         r2 = r
-        nguard = f.arity - xs.length
-        guards = nguard >= 0 ? Array.new(nguard, RushCheck::Guard.new) : []
 
         try = 0
         begin
           if try > @@max_create 
-            raise(RuntimeError, "Failed to guards too many.") 
+            raise(RuntimeError, "Failed to guards too many in the assertion.") 
           end
           args = xs.map do |gen|
             r1, r2 = r2.split
             gen.value(n, r1)
           end
-          ys = args + guards
-          f.call(*ys)
+          f.call(*args)
         rescue Exception => ex
           case ex
           when RushCheck::GuardException

@@ -13,9 +13,8 @@ class Candy
   end
 
   def self.arbitrary
-    xs = [String, Integer].map {|c| c.arbitrary}
-    RushCheck::Gen.create(xs) do |name, price, g|
-      g.guard { price >= 0 }
+    RushCheck::Gen.create(String, Integer) do |name, price|
+      RushCheck::guard { price >= 0 }
       new(name, price)
     end
   end
@@ -30,12 +29,11 @@ class ExpensiveCandy < Candy
   end
 
   def self.arbitrary
-    # xs = [String, Integer].map {|c| c.arbitrary}
     lo = 100000
     g = Gen.sized { |n| Gen.choose(lo, n + lo)}
     xs = [String.arbitrary, g]
-    Gen.create(xs) do |name, price, g|
-      g.guard { price >= 100000 }
+    Gen.create_by_gen(xs) do |name, price|
+      RushCheck::guard { price >= 100000 }
       new(name, price)
     end
   end

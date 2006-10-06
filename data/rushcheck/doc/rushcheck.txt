@@ -121,8 +121,8 @@ Check also the web page
    guards in the property block:
 
      ast_two_sorted =
-       Assertion.new(Integer, Integer) do |x, y, g|
-         g.guard { x <= y }
+       RushCheck::Assertion.new(Integer, Integer) do |x, y|
+         RushCheck::guard { x <= y }
          [x, y].sort == [x, y]
        end
 
@@ -131,18 +131,15 @@ Check also the web page
      true
      irb>
 
-   In this example, the number of arguments of Assertion.new (equals
-   2) is less than the number of variables of the property block
-   (equals 3). It is always assumed that the number of arguments of
-   Assertion.new is equal or less than the number of variables of the
-   block. The arguments of Assertion.new corresponds to the variables
-   of block one to one. Then the rest of variables is assumed as guard
-   conditions (in this example, the variable g is not corresponded and
-   assumed as a guard). We can have any number of guards in the
-   property block. If the guard property does not hold in random
-   testing, then the test is abort and try to take another random
-   instances. We can imagine the following test sequences in
-   ast_two_sorted. 
+   Note that it is always assumed that the number of arguments of
+   Assertion.new must be equal to the number of variables of the block. 
+     Until ver 0.3, experimentally the number of arguments can be 
+     differed, however from ver 0.4, they must be equal.
+   The arguments of Assertion.new corresponds to the variables of block 
+   one to one. We can have any number of guards in the property block. 
+   If the guard property does not hold in random testing, then the test 
+   is abort and try to take another random instances. We can imagine the 
+   following test sequences in ast_two_sorted. 
 
      1: x, y = 1, 2
           --> guard g is passed
@@ -170,8 +167,8 @@ Check also the web page
    trivial cases are appeared in random test.
 
      ast_sort_triv =
-       Assertion.new(Integer, Integer) do |x, y, g|
-         g.guard {x <= y}
+       RushCheck::Assertion.new(Integer, Integer) do |x, y|
+         RushCheck::guard {x <= y}
          ([x, y].sort == [x, y]).trivial{ x == y }
        end
 
@@ -186,8 +183,8 @@ Check also the web page
 
    In addition, we can give another names to watching statistics.
      ast_sort_classify =
-       Assertion.new(Integer, Integer) do |x, y, g|
-         g.guard {x <= y}
+       RushCheck::Assertion.new(Integer, Integer) do |x, y|
+         RushCheck::guard {x <= y}
          test = ([x, y].sort == [x, y])
          test.classify('same'){ x == y }.
            classify('bit diff'){ (x - y).abs == 1 } 
@@ -467,8 +464,8 @@ Check also the web page
     extend Arbitrary
 
     def self.arbitrary
-      Gen.create(String, Integer) do |name, price, g|
-        g.guard { price >= 0 }
+      RushCheck::Gen.create(String, Integer) do |name, price|
+        RushCheck::guard { price >= 0 }
         new(name, price)
       end
     end
@@ -564,7 +561,7 @@ Check also the web page
 
   Using Gen.create to generate random instance, if we gives another
   guard such as   
-    g.guard { price >= 100000 }  # very expensive candy!
+    RushCheck::guard { price >= 100000 }  # very expensive candy!
   then it consumes much time to generate random instance because the
   guard fails so many times. When RushCheck creates random instances,
   it starts smallest as   possible, then the size becomes larger in
