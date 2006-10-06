@@ -1,6 +1,6 @@
 RushCheck - a random testing tool for Ruby
 Tutorial for version 0.4
-2006-08-18 Daisuke IKEGAMI <ikegami@madscientist.jp>
+2006-10-04 Daisuke IKEGAMI <ikegami@madscientist.jp>
 
 This document is a draft and may be obsoleted in future. 
 Check also the web page
@@ -405,7 +405,7 @@ Check also the web page
   To define random generators, we have to add a class method arbitrary
   in YourClass.
 
-  require 'rushcheck/rushcheck'
+  require 'rushcheck'
   class YourClass
     extend RushCheck::Arbitrary
 
