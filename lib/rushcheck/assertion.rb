@@ -12,8 +12,8 @@ module RushCheck
   # Assertion class is one of main features of RushCheck.
   # You can write a testcase for random testing as follows:
   # 
-  # Assertion.new(Integer, String) do |x, y, g|
-  #   g.guard { precondition }
+  # Assertion.new(Integer, String) do |x, y|
+  #   RushCheck::guard { precondition }
   #   body
   # end
   #
