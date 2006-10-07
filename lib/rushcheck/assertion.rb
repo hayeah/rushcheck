@@ -17,7 +17,9 @@ module RushCheck
   #   body
   # end
   #
-  # See also documents and several examples.
+  # Note that the number of arguments in the block must be
+  # equal to the number of arguments of Assertion.new.
+  # See also the RushCheck tutorial and several examples.
   #
   class Assertion
     
@@ -43,7 +45,10 @@ module RushCheck
         end
       end.bind do |args|
         test = begin
-                 @proc.call(*args)
+                 if @proc.call(*args)
+                 then RushCheck::Result.new(true)
+                 else RushCheck::Result.new(false)
+                 end
                rescue Exception => ex
                  case ex
                  when RushCheck::GuardException
