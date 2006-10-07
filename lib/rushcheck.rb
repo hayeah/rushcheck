@@ -8,6 +8,7 @@ require 'rushcheck/gen'
 require 'rushcheck/guard'
 require 'rushcheck/random'
 require 'rushcheck/testable'
+require 'rushcheck/version'
 
 require 'rushcheck/array'
 require 'rushcheck/bool'
