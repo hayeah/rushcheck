@@ -1,0 +1,8 @@
+# version.rb
+#
+
+module RushCheck
+
+  VERSION = "@VERSION@"
+
+end
