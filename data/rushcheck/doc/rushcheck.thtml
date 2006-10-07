@@ -12,6 +12,7 @@ h1. Index
 # <a href="#Getting start">Getting start</a>
 ## <a href="#install by RubyGems">(Option 1.) install by RubyGems</a>
 ## <a href="#using setup.rb after download source codes">(Option 2.) using setup.rb after download source codes</a>
+## <a href="#darcs repository">darcs repository</a>
 # <a href="#Tutorial for writing testcase">Tutorial for writing testcase</a>
 ## <a href="#At first, we have to require the library.">At first, we have to require the library.</a>
 ## <a href="#Start writing testcases">Start writing testcases</a>
@@ -68,6 +69,25 @@ codes, then you can follow the steps.
 See also the following;
 
 <pre>% setup.rb help</pre>
+
+h2. <a name="darcs repository">(Developer's another option)darcs repository</a>
+
+Our darcs repository is provided for developer RushCheck itself, and skip this
+section if you want to only use RushCheck!
+If you have an interest to our development version (not yet shipped), then try to access our darcs repository.
+darcs is a version control system and can be easily installed from
+"the darcs page":http://abridgegame.org/darcs/. After installing
+darcs, you can get the current development of RushCheck by following:
+
+<pre>
+% darcs get --partial http://rushcheck.rubyforge.org/repos/rushcheck
+</pre>
+
+After darcs getting, you can get the newest files whenever you want to
+type
+<pre>
+% darcs pull -a
+</pre>
 
 h1. <a name="Tutorial for writing testcase">Tutorial for writing testcase</a>
 
