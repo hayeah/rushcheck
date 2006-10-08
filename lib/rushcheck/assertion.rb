@@ -26,7 +26,6 @@ module RushCheck
     include RushCheck::Testable
 
     def initialize(*xs, &f)
-      raise ArgumentError unless f.arity == xs.length || f.arity == -1
       @inputs = xs[0..(f.arity - 1)]
       @proc = f
     end

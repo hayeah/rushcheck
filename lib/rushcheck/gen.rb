@@ -25,7 +25,6 @@ module RushCheck
     # Then create_gen returns a Gen object. It may useful to implement
     # arbitrary method into your class.
     def self.create_by_gen(xs, &f)
-      raise ArgumentError unless f.arity == xs.length
       self.new do |n, r|
         r2 = r
 
