@@ -167,9 +167,8 @@ module RushCheck
     end
 
     # bind is a monadic function such as Haskel's (>>=).
-    # bind takes a block which has two variables where the first one
-    # is assumed as an integer, and the second one is assumed as a
-    # random generator of RandomGen. The block should return a Gen object.
+    # bind takes a block which has a variable where is the return value
+    # of the Gen object. The block should return a Gen object.
     def bind
       self.class.new do |n, r| 
         r1, r2 = r.split
