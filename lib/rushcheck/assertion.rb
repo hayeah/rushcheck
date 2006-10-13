@@ -17,8 +17,13 @@ module RushCheck
   #   body
   # end
   #
+  # The return value of the body of testcase is checked by
+  # the method 'check'. 
+  #
   # Note that the number of arguments in the block must be
   # equal to the number of arguments of Assertion.new.
+  # However, for a curried block, we can write also
+  #   Assertion.new(*cs) {|*xs| ...}
   # See also the RushCheck tutorial and several examples.
   #
   class Assertion
