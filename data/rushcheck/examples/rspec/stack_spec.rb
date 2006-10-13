@@ -19,7 +19,7 @@ rescue LoadError
   require 'rushcheck'
 end
 
-def forall(*cs, &f)
+def for_all(*cs, &f)
   RushCheck::Claim.new(*cs, &f).check.should_equal true
 end
 
@@ -28,7 +28,7 @@ require 'stack'
 context "An empty stack" do
 
   specify "should not be empty after 'push'" do
-    forall(Integer) do |item|
+    for_all(Integer) do |item|
       stack = Stack.new
       stack.push item
       stack.should_not_be_empty
@@ -59,14 +59,14 @@ context "A stack (in general)" do
   end
 
   specify "should add the top when sent 'push'" do
-    forall(NotEmptyAndFullStack, String) do |stack, item|
+    for_all(NotEmptyAndFullStack, String) do |stack, item|
       stack.push item
       stack.peek.should_equal item
     end
   end
 
   specify "should NOT remove the top item when sent 'peek'" do
-    forall(NotEmptyAndFullStack, Integer) do |stack, item| 
+    for_all(NotEmptyAndFullStack, Integer) do |stack, item| 
       stack.push item
       stack.peek.should_equal item
       stack.peek.should_equal item
@@ -74,14 +74,14 @@ context "A stack (in general)" do
   end
 
  specify "should return the top item when sent 'pop'" do
-   forall(NotEmptyAndFullStack, Integer) do |stack, item| 
+   for_all(NotEmptyAndFullStack, Integer) do |stack, item| 
      stack.push item
      stack.pop.should_equal item
    end
  end
 
   specify "should remove the top item when sent 'pop'" do
-    forall(NotEmptyAndFullStack, Integer, Integer) do |stack, dummy, item| 
+    for_all(NotEmptyAndFullStack, Integer, Integer) do |stack, dummy, item| 
       stack.push item
       stack.push dummy
       stack.pop
@@ -98,7 +98,7 @@ context "An empty stack" do
   end
 
   specify "should no longer be empty" do
-    forall(Integer) do |item|
+    for_all(Integer) do |item|
       stack = Stack.new
       stack.push item
       stack.should_not_be_empty
@@ -116,7 +116,7 @@ end
 
 context "An almost empty stack (with one item)" do
   specify "should not be empty" do
-    forall(Integer) do |item|
+    for_all(Integer) do |item|
       stack = Stack.new
       stack.push item
       stack.should_not_be_empty
@@ -124,7 +124,7 @@ context "An almost empty stack (with one item)" do
   end
   
   specify "should remain not empty after 'peek'" do
-    forall(Integer) do |item|
+    for_all(Integer) do |item|
       stack = Stack.new
       stack.push item
       stack.peek
@@ -133,7 +133,7 @@ context "An almost empty stack (with one item)" do
   end
   
   specify "should become empty after 'pop'" do
-    forall(Integer) do |item|
+    for_all(Integer) do |item|
       stack = Stack.new
       stack.push item
       stack.pop
@@ -163,15 +163,15 @@ context "An almost full stack (with one item less than capacity)" do
   end
 
   specify "should not be full" do
-    forall(AlmostFullStack) do |stack|
-      stack.should.not.be.full
+    for_all(AlmostFullStack) do |stack|
+      stack.should_not_be_full
     end
   end
   
   specify "should become full when sent 'push'" do
-    forall(AlmostFullStack, Integer) do |stack, item|
+    for_all(AlmostFullStack, Integer) do |stack, item|
       stack.push item
-      stack.should.be.full
+      stack.should_be_full
     end
   end
 end
@@ -196,28 +196,28 @@ context "A full stack" do
    end
 
   specify "should be full" do
-    forall(FullStack) do |stack|
-      stack.should.be.full
+    for_all(FullStack) do |stack|
+      stack.should_be_full
     end
   end
   
   specify "should remain full after 'peek'" do
-    forall(FullStack) do |stack|
+    for_all(FullStack) do |stack|
       stack.peek
-      stack.should.be.full
+      stack.should_be_full
     end
   end
   
   specify "should no longer be full after 'pop'" do
-    forall(FullStack) do |stack|
+    for_all(FullStack) do |stack|
       stack.pop
-      stack.should.not.be.full
+      stack.should_not_be_full
     end
   end
 
   specify "should complain on 'push'" do
-    forall(FullStack, Integer) do |stack, item|
-      lambda { stack.push item }.should.raise StackOverflowError
+    for_all(FullStack, Integer) do |stack, item|
+      lambda { stack.push item }.should_raise StackOverflowError
     end
   end
 end
