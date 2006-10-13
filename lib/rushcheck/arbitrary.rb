@@ -4,7 +4,21 @@
 # Arbitrary provides an instance method arbitrary.
 # Coarbitrary provides a class method coarbitrary.
 # However they are abstract methods and should be overrided
-# in each class after include/extend them.
+# in each class after extend/include them.
+#
+# class YourClass
+#   extend  RushCheck::Arbitrary
+#   include RushCheck::Coarbitrary
+#
+#   def self.arbitrary
+#   # must be overrided   
+#   end
+#
+#   def coarbitrary
+#   # must be overrided also
+#   end
+# end
+#
 
 module RushCheck
 
