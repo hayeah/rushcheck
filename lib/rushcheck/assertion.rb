@@ -24,6 +24,8 @@ module RushCheck
   # equal to the number of arguments of Assertion.new.
   # However, for a curried block, we can write also
   #   Assertion.new(*cs) {|*xs| ...}
+  #
+  # See also class Claim, which is a subclass of Assertion
   # See also the RushCheck tutorial and several examples.
   #
   class Assertion
