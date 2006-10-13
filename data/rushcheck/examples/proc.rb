@@ -13,7 +13,7 @@ class Proc
   end
 end
 
-class MyRandomProc < RushCheck::RandomProc; end
+class MyRandomProc < RandomProc; end
 
 def associativity_integer
   MyRandomProc.set_pattern([Integer], [Integer])
