@@ -35,7 +35,7 @@ module RushCheck
       @proc = f
     end
 
-    def property
+    def _property
       g = RushCheck::Gen.new do |n, r|
         r2 = r
         if @inputs
@@ -49,10 +49,7 @@ module RushCheck
         end
       end.bind do |args|
         test = begin
-                 if @proc.call(*args)
-                 then RushCheck::Result.new(true)
-                 else RushCheck::Result.new(false)
-                 end
+                 yield(args)
                rescue Exception => ex
                  case ex
                  when RushCheck::GuardException
@@ -72,6 +69,16 @@ module RushCheck
       end
 
       RushCheck::Property.new(g)
+    end
+    private :_property
+
+    def property
+      _property { |args|
+        if @proc.call(*args)
+        then RushCheck::Result.new(true)
+        else RushCheck::Result.new(false)
+        end
+        }
     end
 
   end
