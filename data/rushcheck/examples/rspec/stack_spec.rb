@@ -29,9 +29,9 @@ context "An empty stack" do
 
   specify "should not be empty after 'push'" do
     forall(Integer) do |item|
-      @stack = Stack.new
-      @stack.push item
-      @stack.should_not_be_empty
+      stack = Stack.new
+      stack.push item
+      stack.should_not_be_empty
     end
   end
 
