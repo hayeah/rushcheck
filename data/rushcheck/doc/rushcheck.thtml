@@ -1,5 +1,5 @@
 <address>
-last-modified: 2006-10-06 Daisuke IKEGAMI <ikegami@madscientist.jp>
+last-modified: 2006-10-13 Daisuke IKEGAMI <ikegami@madscientist.jp>
 </address>
 
 This tutorial is written in a simple markup language 
@@ -19,8 +19,8 @@ h1. Index
 ## <a href="#Watching the statistics">Watching the statistics</a>
 ### <a href="#trivial">'trivial'</a>
 ### <a href="#classify">'classify'</a>
-# <a href="Combining unit testing and RushCheck">Combining unit testing and RushCheck</a>
-# <a href="Combining RSpec and RushCheck">Combining RSpec and RushCheck</a>
+# <a href="#Combining unit testing and RushCheck">Combining unit testing and RushCheck</a>
+# <a href="#Combining RSpec and RushCheck">Combining RSpec and RushCheck</a>
 ## <a href="#With another basic classes for assertions">With another basic classes for assertions</a>
 ### <a href="#SpecialString">SpecialString</a>
 ### <a href="#Array and RandomArray">Array and RandomArray</a>
@@ -337,6 +337,7 @@ Example:
 </pre>
 
 h2. <a name="Combining RSpec and RushCheck">Combining RSpec and RushCheck</a>
+
 "RSpec":http://rspec.rubyforge.org is another testing framework which helps Behaviour Driven Development (BDD).
 To combine RSpec and RushCheck, the following trick maybe useful and easy to read:
 <pre>
