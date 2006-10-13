@@ -3,6 +3,6 @@
 
 module RushCheck
 
-  VERSION = "1.5"
+  VERSION = "0.6"
 
 end

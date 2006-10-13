@@ -9,7 +9,7 @@ require 'rake/gempackagetask'
 spec = Gem::Specification.new do |s|
   s.name      = 'rushcheck'
   s.summary   = "A lightweight random testing tool"
-  s.version   = "1.5"
+  s.version   = "0.6"
   s.author    = 'Daisuke IKEGAMI'
   s.email     = 'ikegami@madscientist.jp'
   s.homepage  = 'http://rushcheck.rubyforge.org'
