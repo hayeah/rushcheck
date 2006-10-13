@@ -4,6 +4,7 @@
 
 require 'rushcheck/arbitrary'
 require 'rushcheck/assertion'
+require 'rushcheck/claim'
 require 'rushcheck/gen'
 require 'rushcheck/guard'
 require 'rushcheck/random'
