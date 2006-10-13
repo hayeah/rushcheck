@@ -51,11 +51,11 @@ module RushCheck
     end
 
     # create is one of primitive generators to create a random Gen object.
-    # create takes an array of classes, and any block to generate object.
+    # create takes at least a class, and any block to generate object.
     # Then create returns a Gen object. It may useful to implement
     # arbitrary method into your class.
-    def self.create(cs, &f)
-      self.create_by_gen(cs.map {|c| c.arbitrary}) { yield f }
+    def self.create(*cs, &f)
+      self.create_by_gen(cs.map {|c| c.arbitrary}) { f.call(cs) }
     end
 
     # elements is one of primitive generators to create a random Gen
