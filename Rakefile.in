@@ -10,6 +10,7 @@ RUSHCHECK_VERSION="@VERSION@"
 task :default => ["dist", "gem"]
 
 task :dist do
+  system "darcs push -a"
   system "darcs dist -d rushcheck-#{RUSHCHECK_VERSION}"
   system "mv rushcheck-#{RUSHCHECK_VERSION}.tar.gz pkg/"
 end
