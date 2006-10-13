@@ -19,6 +19,8 @@ h1. Index
 ## <a href="#Watching the statistics">Watching the statistics</a>
 ### <a href="#trivial">'trivial'</a>
 ### <a href="#classify">'classify'</a>
+# <a href="Combining unit testing and RushCheck">Combining unit testing and RushCheck</a>
+# <a href="Combining RSpec and RushCheck">Combining RSpec and RushCheck</a>
 ## <a href="#With another basic classes for assertions">With another basic classes for assertions</a>
 ### <a href="#SpecialString">SpecialString</a>
 ### <a href="#Array and RandomArray">Array and RandomArray</a>
@@ -306,6 +308,59 @@ OK, passed 100 tests.
 true
 irb>
 </pre>
+
+h2. <a name="Combining unit testing and RushCheck">Combining unit testing and RushCheck</a>
+
+The library 'test/unit' of Ruby is useful for unit testing. Here is a trick to use 'test/unit'.
+
+<pre>
+  def forall(*cs, &f)
+    assert(RushCheck::Claim.new(*cs, &f).check)
+  end
+</pre>
+
+The class Claim is a subclass of Assertion. The meaning is almost similar to Assertion, however
+Claim does not check the result value of the given block 'f'. Because assertions in 'test/unit'
+such as 'assert_equal' does not return any result, but return nil, we don't need to check the
+result values of a sequence of assertions. Nevertheless we can check the testcase because
+the assertions in 'test/unit' raises an exception if the testcase is failed.
+
+Example:
+<pre>
+  def test_not_empty_after_push
+    array = Array.new
+    forall(Integer) do |item|
+      array.push item
+      assert(! array.empty?)
+    end
+  end
+</pre>
+
+h2. <a name="Combining RSpec and RushCheck">Combining RSpec and RushCheck</a>
+"RSpec":http://rspec.rubyforge.org is another testing framework which helps Behaviour Driven Development (BDD).
+To combine RSpec and RushCheck, the following trick maybe useful and easy to read:
+<pre>
+  def forall(*cs, &f)
+    RushCheck::Claim.new(*cs, &f).check.should_equal true
+  end
+</pre>
+
+Then, for example, we can write a specification of Array#push as follows:
+<pre>
+context "An empty array" do
+
+  specify "should not be empty after 'push'" do
+    forall(Integer) do |item|
+      array = Array.new
+      array.push item
+      array.should_not_be_empty
+    end
+  end
+
+end
+</pre>
+
+See also 'examples/rspec' in the distribution of RushCheck for details.
 
 h2. <a name="With another basic classes for assertions">With another basic classes for assertions</a>
 
