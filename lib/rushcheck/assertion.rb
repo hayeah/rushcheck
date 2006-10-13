@@ -38,6 +38,8 @@ module RushCheck
     end
 
     def _property
+      # :nodoc:
+      # should be raise when the number of arguments are differ?
       g = RushCheck::Gen.new do |n, r|
         r2 = r
         if @inputs
