@@ -6,10 +6,18 @@ require 'rubygems'
 require 'rake'
 require 'rake/gempackagetask'
 
+RUSHCHECK_VERSION="0.6"
+task :default => ["dist", "gem"]
+
+task :dist do
+  system "darcs dist -d rushcheck-#{RUSHCHECK_VERSION}"
+  system "mv rushcheck-#{RUSHCHECK_VERSION}.tar.gz pkg/"
+end
+
 spec = Gem::Specification.new do |s|
   s.name      = 'rushcheck'
   s.summary   = "A lightweight random testing tool"
-  s.version   = "0.6"
+  s.version   = RUSHCHECK_VERSION
   s.author    = 'Daisuke IKEGAMI'
   s.email     = 'ikegami@madscientist.jp'
   s.homepage  = 'http://rushcheck.rubyforge.org'
