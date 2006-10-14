@@ -13,6 +13,13 @@ class RandomArray < Array
   extend RushCheck::Arbitrary
   include RushCheck::Coarbitrary
 
+  # self.set_pattern must be executed before calling self.arbitrary.
+  # self.set_pattern defines pattern of random arrays for self.arbitrary.
+  # self.set_pattern takes a variable and a block, where the variable
+  # is used for the first element of random array. On the other hand,
+  # the block should define random array by inductive way; the block
+  # takes two variables and the first variable is assumed as an array
+  # and the second variable is the index of array.
   def self.set_pattern(base, &f)
     @@base, @@indp = base, f
     self
