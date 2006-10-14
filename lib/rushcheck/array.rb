@@ -24,24 +24,35 @@ class RandomArray < Array
     @@base, @@indp = base, f
     nil
   end
-  
-  def self.arbitrary
+
+  # a private method for self.arbitrary
+  def self.create_array(len)
+    RushCheck::Gen.new do |n, r|
+      ary = [@@base.class.arbitrary.value(n, r)]
+      r2 = r
+      (1..len).each do |i|
+        r1, r2 = r2.split
+        ary << @@indp.call(ary, i).class.arbitrary.value(n, r1)
+      end
+      
+      ary
+    end
+  end
+
+  # a private method for self.arbitrary
+  def self.arrange_len
     RushCheck::Gen.sized do |m|
       RushCheck::Gen.choose(0, m).bind do |len|
-        if len = 0
-        then RushCheck::Gen.unit([])
-        else
-          RushCheck::Gen.new do |n, r|
-            ary = [@@base.arbitrary.value(n, r)]
-            r2 = r
-            (1..len).each do |i|
-              r1, r2 = r2.split
-              ary << @@indp.call(ary, i).arbitrary.value(n, r1)
-            end
-
-            ary
-          end
-        end
+        yield len
+      end
+    end
+  end
+  
+  def self.arbitrary
+    self.arrange_len do |len|
+      if len = 0
+      then RushCheck::Gen.unit([])
+      else self.create_array(len)
       end
     end
   end
@@ -52,6 +63,16 @@ class RandomArray < Array
       r = c.coarbitrary(r.variant(1))
     end
     r
+  end
+
+end
+
+class NonEmptyRandomArray < RandomArray
+
+  def self.arbitrary
+    self.arrange_len do |len|
+      self.create_array(len + 1)
+    end
   end
 
 end
