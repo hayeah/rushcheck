@@ -222,11 +222,9 @@ module RushCheck
     # Integer. variant is needed to generate rundom functions.
     def variant(v)
       self.class.new do |n, r| 
-        g = (1..v).inject(r) do |gen, i| 
-          gen, dummy = gen.split 
-          gen
-        end
-        value(n, g)
+        gen = r
+        v.times { gen, dummy = gen.split }
+        value(n, gen)
       end
     end
 
