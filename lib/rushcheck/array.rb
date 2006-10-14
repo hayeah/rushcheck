@@ -22,7 +22,7 @@ class RandomArray < Array
   # and the second variable is the index of array.
   def self.set_pattern(base, &f)
     @@base, @@indp = base, f
-    self
+    nil
   end
   
   def self.arbitrary
