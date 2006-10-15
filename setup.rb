@@ -55,12 +55,10 @@ class ConfigTable
     @config_opt = nil
     @verbose = true
     @no_harm = false
-    @rdoc_prefix = nil
   end
 
   attr_accessor :install_prefix
   attr_accessor :config_opt
-  attr_accessor :rdoc_prefix
 
   attr_writer :verbose
 
@@ -763,8 +761,7 @@ class ToplevelInstaller
     [ 'install',  'installs files' ],
     [ 'test',     'run all tests in test/' ],
     [ 'clean',    "does `make clean' for each extention" ],
-    [ 'distclean',"does `make distclean' for each extention" ],
-    [ 'rdoc',     "make documents using rdoc"]
+    [ 'distclean',"does `make distclean' for each extention" ]
   ]
 
   def ToplevelInstaller.invoke
@@ -817,7 +814,7 @@ class ToplevelInstaller
       exec_install
     else
       case task
-      when 'config', 'test', 'rdoc'
+      when 'config', 'test'
         ;
       when 'clean', 'distclean'
         @config.load_savefile if File.exist?(@config.savefile)
@@ -904,7 +901,6 @@ class ToplevelInstaller
   alias parsearg_test       parsearg_no_options
   alias parsearg_clean      parsearg_no_options
   alias parsearg_distclean  parsearg_no_options
-  # alias parsearg_rdoc       parsearg_no_options
 
   def parsearg_config
     evalopt = []
@@ -949,20 +945,6 @@ class ToplevelInstaller
     end
   end
 
-  def parsearg_rdoc
-    @config.rdoc_prefix = ''
-    while a = ARGV.shift
-      case a 
-      when /\A--rdoc=/
-        path = a.split(/=/, 2)[1]
-        path = File.expand_path(path) unless path[0,1] == '/'
-        @config.rdoc_prefix = path
-      else
-        setup_rb_error "rdoc: unknown option #{a}"
-      end
-    end
-  end
-
   def print_usage(out)
     out.puts 'Typical Installation Procedure:'
     out.puts "  $ ruby #{File.basename $0} config"
@@ -999,9 +981,6 @@ class ToplevelInstaller
     out.printf fmt, '--no-harm', 'only display what to do if given', 'off'
     out.printf fmt, '--prefix=path',  'install path prefix', ''
     out.puts
-    out.puts 'Options for RDOC:'
-    out.printf fmt, '--rdoc=path', 'rdoc path prefix', ''
-    out.puts
   end
 
   #
@@ -1022,12 +1001,7 @@ class ToplevelInstaller
   end
 
   def exec_test
-    result = @installer.exec_test
-    exit(result ? 0 : 1)
-  end
-
-  def exec_rdoc
-    @installer.exec_rdoc
+    @installer.exec_test
   end
 
   def exec_show
@@ -1131,16 +1105,8 @@ class ToplevelInstallerMulti < ToplevelInstaller
 
   def exec_test
     run_hook 'pre-test'
-    results = each_selected_installers {|inst| inst.exec_test }
+    each_selected_installers {|inst| inst.exec_test }
     run_hook 'post-test'
-
-    results.all? {|r| r}
-  end
-
-  def exec_rdoc
-    run_hook 'pre-rdoc'
-    each_selected_installers {|inst| inst.exec_rdoc }
-    run_hook 'post-rdoc'
   end
 
   def exec_clean
@@ -1167,10 +1133,8 @@ class ToplevelInstallerMulti < ToplevelInstaller
       $stderr.puts "Processing the package `#{pack}' ..." if verbose?
       Dir.mkdir "packages/#{pack}" unless File.dir?("packages/#{pack}")
       Dir.chdir "packages/#{pack}"
-      result = yield @installers[pack]
+      yield @installers[pack]
       Dir.chdir '../..'
-      
-      result
     end
   end
 
@@ -1504,18 +1468,6 @@ class Installer
   end
 
   #
-  # TASK rdoc
-  #
-  def exec_rdoc
-    path = @config.rdoc_prefix ? @config.rdoc_prefix : srcdir_root + "/rdoc"
-    if path.nil? || path.empty?
-      raise(RuntimeError, "Set --rdoc option to indicate directory.")
-    end
-    comm = ["rdoc", "-o", path].join(" ")
-    Dir.chdir("./lib") { system comm }
-  end
-
-  #
   # TASK clean
   #
 
@@ -1541,7 +1493,6 @@ class Installer
   #
 
   def exec_distclean
-    rm_rf "rdoc"
     exec_task_traverse 'distclean'
     rm_f @config.savefile
     rm_f 'InstalledFiles'
