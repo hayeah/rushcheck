@@ -67,7 +67,10 @@ class PositiveInteger < Integer
 
   # this method is needed to use Arbitrary.
   def self.arbitrary
-    RushCheck::Gen.sized {|n| RushCheck::Gen.choose(1, n) }
+    RushCheck::Gen.sized do |n| 
+      n = 1 - n if n <= 0
+      RushCheck::Gen.choose(1, n) 
+    end
   end
 
 end
@@ -92,7 +95,10 @@ class NegativeInteger < Integer
 
   # this method is needed to use Arbitrary.
   def self.arbitrary
-    RushCheck::Gen.sized {|n| RushCheck::Gen.choose(-n, -1) }
+    RushCheck::Gen.sized do |n| 
+      n = (-1) - n if n >= 0
+      RushCheck::Gen.choose(-n, -1) 
+    end
   end
 
 end
