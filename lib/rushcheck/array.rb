@@ -54,6 +54,7 @@ class RandomArray < Array
   # a private method for self.arbitrary
   def self.arrange_len
     RushCheck::Gen.sized do |m|
+      m = 1 - m if m <= 0
       RushCheck::Gen.choose(0, m).bind do |len|
         yield len
       end
@@ -62,7 +63,7 @@ class RandomArray < Array
   
   def self.arbitrary
     self.arrange_len do |len|
-      if len = 0
+      if len == 0
       then RushCheck::Gen.unit([])
       else self.create_array(len)
       end
