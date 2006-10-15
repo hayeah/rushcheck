@@ -55,7 +55,7 @@ module RushCheck
     # Then create returns a Gen object. It may useful to implement
     # arbitrary method into your class.
     def self.create(*cs, &f)
-      self.create_by_gen(cs.map {|c| c.arbitrary}) { f.call(cs) }
+      self.create_by_gen(cs.map {|c| c.arbitrary}, &f) 
     end
 
     # elements is one of primitive generators to create a random Gen
@@ -196,7 +196,7 @@ module RushCheck
     # a generator of the property.
     def forall
       bind do |*a|
-        yield(*a).property.bind do |res|
+        yield(*a).property.gen.bind do |res|
           res.arguments.push(a.to_s)
           self.class.unit(res)
         end
