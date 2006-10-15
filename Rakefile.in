@@ -1,5 +1,5 @@
 # Rakefile for RushCheck
-#
+# Do NOT edit Rakefile but edit Rakefile.in!
 #
 
 require 'rubygems'
@@ -43,4 +43,19 @@ end
 Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_zip = true
   pkg.need_tar = true
+end
+
+task :rdoc do
+  Dir.chdir('./lib') do
+    system ['rdoc', '-o', '../data/rushcheck/rdoc'].join(' ')
+  end
+end
+
+task :test_all => Dir.glob("test/spec_*.rb") do |t|
+  Dir.chdir('./test') do
+    specs = t.prerequisites.map {|f| File.basename f}
+    specs.each do |spec|
+    raise RuntimeError, "a test is failed" unless system ['spec', spec, '-f', 's', '-c', '-b'].join(' ')
+    end
+  end
 end
