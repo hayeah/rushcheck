@@ -29,21 +29,3 @@ is distributed under LGPL. Because the RushCheck library does
 not use any output of setup.rb and not linked to setup.rb,
 the LGPL is applied to setup.rb only. (Let me know if I am
 misunderstanding about the license issue)
-
-= Changes from setup.rb ver 3.4.1
-
-The installer setup.rb is distributed under LGPL by Minero Aoki.
-  http://raa.ruby-lang.org/project/setup/
-  http://i.loveruby.net/en/projects/setup/
-
-There are two changes from the original setup.rb ver 3.4.1.
-
-1. change for the test command of setup.rb
-
-I have to modify setup.rb to work with darcs. Darcs requires
-the test script that it should be change the status to 1 when
-any test is failed. However, the original setup.rb (ver 3.4.1)
-does not change unless a test is failed.
-
-2. add the rdoc command to setup.rb and distclean the rdoc dir
-
