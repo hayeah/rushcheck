@@ -121,7 +121,7 @@ module RushCheck
 
   # TheStdGen is a singleton class to get the unique random number
   # generator using StdGen. TheStdGen includes ruby's Singleton module.
-  class TheStdGen 
+  class TheStdGen < StdGen
 
     include Singleton
     include RushCheck::RandomGen  
@@ -141,6 +141,10 @@ module RushCheck
       @gen = @gen.gen_next[1]
 
       result
+    end
+
+    def to_s
+      @gen.to_s
     end
 
     def gen_range
