@@ -1,15 +1,16 @@
 # Rakefile for RushCheck
-#
+# Do NOT edit Rakefile but edit Rakefile.in!
 #
 
 require 'rubygems'
 require 'rake'
 require 'rake/gempackagetask'
 
-RUSHCHECK_VERSION="0.6"
+RUSHCHECK_VERSION="0.7"
 task :default => ["dist", "gem"]
 
 task :dist do
+  system "darcs push -a"
   system "darcs dist -d rushcheck-#{RUSHCHECK_VERSION}"
   system "mv rushcheck-#{RUSHCHECK_VERSION}.tar.gz pkg/"
 end
@@ -42,4 +43,19 @@ end
 Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_zip = true
   pkg.need_tar = true
+end
+
+task :rdoc do
+  Dir.chdir('./lib') do
+    system ['rdoc', '-o', '../data/rushcheck/rdoc'].join(' ')
+  end
+end
+
+task :test_all => Dir.glob("test/spec_*.rb") do |t|
+  Dir.chdir('./test') do
+    specs = t.prerequisites.map {|f| File.basename f}
+    specs.each do |spec|
+    raise RuntimeError, "a test is failed" unless system ['spec', spec, '-f', 's', '-c', '-b'].join(' ')
+    end
+  end
 end
