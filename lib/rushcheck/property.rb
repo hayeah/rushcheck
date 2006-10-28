@@ -16,7 +16,7 @@ module RushCheck
       case obj
       when nil, true, false
         result = RushCheck::Result.new(obj, stamp, arguments)
-        @gen    = RushCheck::Gen.unit(result)
+        @gen   = RushCheck::Gen.unit(result)
       when Gen
         @gen = obj
       else
