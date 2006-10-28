@@ -77,7 +77,7 @@ class Tree
   end
 end
 
-class Leaf
+class Leaf < Tree
   extend RushCheck::Arbitrary
   include RushCheck::Coarbitrary
   
@@ -90,7 +90,7 @@ class Leaf
   end
 end
 
-class Branch
+class Branch < Tree
   extend RushCheck::Arbitrary
   include RushCheck::Coarbitrary
 
