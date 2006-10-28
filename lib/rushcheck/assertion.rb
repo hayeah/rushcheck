@@ -53,7 +53,7 @@ module RushCheck
         end
       end.bind do |args|
         test = begin
-                 @proc.call(args) # not yield here!
+                 @proc.call(*args) # not yield here!
                rescue Exception => ex
                  case ex
                  when RushCheck::GuardException
