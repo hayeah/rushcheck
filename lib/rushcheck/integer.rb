@@ -97,7 +97,7 @@ class NegativeInteger < Integer
   def self.arbitrary
     RushCheck::Gen.sized do |n| 
       n = (-1) - n if n >= 0
-      RushCheck::Gen.choose(-n, -1) 
+      RushCheck::Gen.choose(n, -1) 
     end
   end
 
