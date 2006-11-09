@@ -30,9 +30,9 @@ class ExpensiveCandy < Candy
 
   def self.arbitrary
     lo = 100000
-    g = Gen.sized { |n| Gen.choose(lo, n + lo)}
+    g = RushCheck::Gen.sized { |n| Gen.choose(lo, n + lo)}
     xs = [String.arbitrary, g]
-    Gen.create_by_gen(xs) do |name, price|
+    RushCheck::Gen.create_by_gen(xs) do |name, price|
       RushCheck::guard { price >= 100000 }
       new(name, price)
     end

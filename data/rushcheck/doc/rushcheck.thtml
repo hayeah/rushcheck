@@ -662,7 +662,7 @@ h3. <a name="using Gen.create">(1) using Gen.create</a>
 
 <pre>
 class Candy
-  extend Arbitrary
+  extend RushCheck::Arbitrary
 
   def self.arbitrary
     RushCheck::Gen.create(String, Integer) do |name, price|
