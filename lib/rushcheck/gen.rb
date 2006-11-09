@@ -219,7 +219,7 @@ module RushCheck
 
     # variant constructs a generator which transforms the random number
     # seed. variant takes one variable which should be an
-    # Integer. variant is needed to generate rundom functions.
+    # Integer. variant is needed to generate random functions.
     def variant(v)
       self.class.new do |n, r| 
         gen = r
